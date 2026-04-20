@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { OrderDetailDialog } from '@/app/(dashboard)/orders/OrderDetailDialog';
+import { OrderDetailDialog } from '@/app/dashboard/orders/OrderDetailDialog';
 import { OrderForm } from '@/components/orders/OrderForm';
 import { OrderList } from '@/components/orders/OrderList';
 import { PageWrapper } from '@/components/layout/PageWrapper';
