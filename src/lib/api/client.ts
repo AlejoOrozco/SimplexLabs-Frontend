@@ -1,3 +1,126 @@
+import { z } from 'zod';
+import { endpoints, apiSuccessEnvelopeSchema } from '@/lib/api/endpoints';
+import { ApiError, normalizeApiError } from '@/lib/api/errors';
+import { eventBus } from '@/lib/realtime/event-bus';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+const REQUEST_TIMEOUT_MS = 30_000;
+
+const NON_RETRYABLE_CODES = new Set(['conflict', 'payload_too_large', 'illegal_state']);
+const IDEMPOTENT_METHODS = new Set(['GET', 'PUT']);
+
+interface ApiFetchOptions {
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  query?: Record<string, string | number | boolean | undefined>;
+  body?: unknown;
+  headers?: Record<string, string>;
+  isIdempotent?: boolean;
+}
+
+function buildUrl(path: string, query?: ApiFetchOptions['query']): string {
+  const normalizedBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+  const relativePath = path.startsWith('/') ? path : `/${path}`;
+  const rawUrl = normalizedBase ? `${normalizedBase}${relativePath}` : relativePath;
+  const url = new URL(rawUrl, 'http://localhost:3000');
+  if (query) {
+    Object.entries(query).forEach(([key, value]) => {
+      if (value === undefined) return;
+      url.searchParams.set(key, String(value));
+    });
+  }
+  if (normalizedBase) return url.toString();
+  return `${url.pathname}${url.search}`;
+}
+
+function createAbortSignal(timeoutMs: number): AbortSignal {
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), timeoutMs);
+  return controller.signal;
+}
+
+async function executeFetch<T>(url: string, options: ApiFetchOptions, correlationId: string): Promise<T> {
+  const response = await fetch(url, {
+    method: options.method ?? 'GET',
+    credentials: 'include',
+    headers: {
+      'content-type': 'application/json',
+      'x-correlation-id': correlationId,
+      ...options.headers,
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    signal: createAbortSignal(REQUEST_TIMEOUT_MS),
+  });
+
+  if (response.ok) {
+    const envelopeJson: unknown = await response.json();
+    const parsedEnvelope = apiSuccessEnvelopeSchema(z.unknown()).safeParse(envelopeJson);
+    if (!parsedEnvelope.success) {
+      throw new ApiError({
+        message: 'Malformed response envelope',
+        code: 'bad_request',
+        statusCode: 400,
+        correlationId,
+      });
+    }
+    return parsedEnvelope.data.data as T;
+  }
+
+  const errorJson: unknown = await response.json().catch(() => undefined);
+  throw normalizeApiError(errorJson, response.headers.get('retry-after'));
+}
+
+async function maybeRefresh(): Promise<boolean> {
+  const refreshUrl = buildUrl(endpoints.auth.refresh.path);
+  const correlationId = crypto.randomUUID();
+  try {
+    await executeFetch(refreshUrl, { method: 'POST' }, correlationId);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
+  const correlationId = crypto.randomUUID();
+  const method = options.method ?? 'GET';
+  const url = buildUrl(path, options.query);
+  const canRetry5xx = options.isIdempotent || IDEMPOTENT_METHODS.has(method);
+
+  let attempt = 0;
+  while (attempt < 4) {
+    try {
+      return await executeFetch<T>(url, options, correlationId);
+    } catch (error) {
+      if (!(error instanceof ApiError)) throw error;
+      if (error.statusCode === 401 && path !== endpoints.auth.refresh.path) {
+        const refreshed = await maybeRefresh();
+        if (!refreshed) {
+          eventBus.emit('session:expired', { reason: 'refresh_failed' });
+          throw error;
+        }
+        attempt += 1;
+        continue;
+      }
+      if (error.statusCode === 429) throw error;
+      if (error.statusCode >= 500 && canRetry5xx && attempt < 3) {
+        const backoff = [250, 1000, 3000][attempt] ?? 3000;
+        const jitter = backoff * (0.5 + Math.random());
+        await new Promise((resolve) => setTimeout(resolve, jitter));
+        attempt += 1;
+        continue;
+      }
+      if (NON_RETRYABLE_CODES.has(error.code)) throw error;
+      throw error;
+    }
+  }
+
+  throw new ApiError({
+    message: 'Request failed after retries',
+    code: 'internal',
+    statusCode: 500,
+    correlationId,
+  });
+}
 import axios, {
   AxiosError,
   type AxiosInstance,
