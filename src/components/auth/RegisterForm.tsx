@@ -18,6 +18,7 @@ import { FormError } from '@/components/shared/FormError';
 import { useAuth } from '@/context/auth-context';
 import { ApiClientError } from '@/lib/api/client';
 import { registerSchema, type RegisterDto } from '@/lib/schemas/auth.schema';
+import { notify } from '@/lib/toast';
 import { Niche } from '@/lib/types';
 import { nicheLabel } from '@/lib/utils/format';
 
@@ -37,6 +38,8 @@ export function RegisterForm(): JSX.Element {
       companyName: '',
       niche: Niche.GYM,
     },
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
   });
 
   const {
@@ -49,7 +52,11 @@ export function RegisterForm(): JSX.Element {
   const onSubmit = async (values: RegisterDto): Promise<void> => {
     setApiError(null);
     try {
-      await registerUser(values);
+      await notify.promise(registerUser(values), {
+        loading: 'Creating account...',
+        success: 'Account created',
+        error: (error) => (error instanceof Error ? error.message : 'Registration failed'),
+      });
     } catch (error) {
       const message =
         error instanceof ApiClientError

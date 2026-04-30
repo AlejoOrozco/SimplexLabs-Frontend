@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 
+const POST_LOGIN_REDIRECT_KEY = 'simplex_post_login_redirect';
+
 export default function LoginPage(): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,13 @@ export default function LoginPage(): JSX.Element {
         method: 'POST',
         body: { email, password },
       });
-      router.push('/dashboard');
+      const redirectTo = sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY);
+      if (redirectTo) {
+        sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
+        router.push(redirectTo);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (unknownError) {
       const message = unknownError instanceof Error ? unknownError.message : 'Login failed';
       setError(message);

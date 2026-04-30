@@ -1,23 +1,48 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+  Activity,
+  Building2,
+  CalendarDays,
+  Inbox,
+  LayoutDashboard,
+  Settings2,
+  ShoppingCart,
+  Users,
+  Wallet,
+  XCircle,
+} from 'lucide-react';
+
 export interface NavItem {
   href: string;
   label: string;
+  icon: LucideIcon;
   adminOnly: boolean;
 }
 
-export const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', adminOnly: false },
-  { href: '/dashboard/appointments', label: 'Appointments', adminOnly: false },
-  { href: '/dashboard/conversations', label: 'Conversations', adminOnly: false },
-  { href: '/dashboard/orders', label: 'Orders', adminOnly: false },
-  { href: '/dashboard/products', label: 'Products', adminOnly: false },
-  { href: '/dashboard/websites', label: 'Websites', adminOnly: false },
-  { href: '/dashboard/contacts', label: 'Contacts', adminOnly: false },
-  { href: '/dashboard/companies', label: 'Companies', adminOnly: true },
-  { href: '/dashboard/users', label: 'Users', adminOnly: true },
-  { href: '/dashboard/plans', label: 'Plans', adminOnly: true },
-  { href: '/dashboard/subscriptions', label: 'Subscriptions', adminOnly: true },
+export interface NavSections {
+  primary: NavItem[];
+  admin: NavItem[];
+}
+
+const PRIMARY_NAV_ITEMS: readonly NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+  { href: '/inbox', label: 'Inbox', icon: Inbox, adminOnly: false },
+  { href: '/appointments', label: 'Appointments', icon: CalendarDays, adminOnly: false },
+  { href: '/staff', label: 'Staff', icon: Users, adminOnly: false },
+  { href: '/orders', label: 'Orders', icon: ShoppingCart, adminOnly: false },
+  { href: '/payments', label: 'Payments', icon: Wallet, adminOnly: false },
+  { href: '/settings/agent/profile', label: 'Agent Settings', icon: Settings2, adminOnly: false },
+  { href: '/failed-tasks', label: 'Failed Tasks', icon: XCircle, adminOnly: false },
 ] as const;
 
-export function getNavItems(isAdmin: boolean): NavItem[] {
-  return NAV_ITEMS.filter((item) => (item.adminOnly ? isAdmin : true));
+const ADMIN_NAV_ITEMS: readonly NavItem[] = [
+  { href: '/companies', label: 'Companies', icon: Building2, adminOnly: true },
+  { href: '/health', label: 'Health', icon: Activity, adminOnly: true },
+] as const;
+
+export function getNavSections(isAdmin: boolean): NavSections {
+  return {
+    primary: [...PRIMARY_NAV_ITEMS],
+    admin: isAdmin ? [...ADMIN_NAV_ITEMS] : [],
+  };
 }

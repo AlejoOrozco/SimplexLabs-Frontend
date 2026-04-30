@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
@@ -19,8 +20,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   public override componentDidCatch(error: Error, info: ErrorInfo): void {
-    // eslint-disable-next-line no-console
-    console.error('[ErrorBoundary]', error, info);
+    void error;
+    void info;
   }
 
   private readonly reset = (): void => this.setState({ error: null });
@@ -32,13 +33,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (error) {
       if (fallback) return fallback(error, this.reset);
       return (
-        <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-4 text-sm">
-          <p className="font-semibold text-red-800">Something went wrong</p>
-          <p className="mt-1 text-red-700">{error.message}</p>
+        <div role="alert" className="rounded-lg border border-error bg-error-light p-4 text-sm">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-error-dark" />
+            <p className="font-semibold text-error-dark">Something went wrong</p>
+          </div>
+          {process.env.NODE_ENV !== 'production' ? (
+            <p className="mt-1 text-xs text-error-dark">{error.message}</p>
+          ) : null}
           <button
             type="button"
             onClick={this.reset}
-            className="mt-3 rounded border px-3 py-1 text-xs"
+            className="mt-3 rounded-md border border-border-default bg-surface-page px-3 py-1 text-xs text-text-primary"
           >
             Try again
           </button>

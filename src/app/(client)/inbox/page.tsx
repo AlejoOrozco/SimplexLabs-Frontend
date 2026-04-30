@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { SkeletonTable } from '@/components/shared/Skeleton';
 import { ConversationRow } from '@/features/conversations/components/conversation-row';
 import { useConversationList } from '@/features/conversations/hooks/use-conversation-list';
 
@@ -13,13 +15,29 @@ export default function InboxPage(): JSX.Element {
   );
 
   if (query.isLoading) {
-    return <div className="animate-pulse rounded border p-4">Loading inbox...</div>;
+    return <SkeletonTable />;
   }
   if (query.isError) {
-    return <div className="rounded border border-red-200 bg-red-50 p-4">Failed to load inbox.</div>;
+    return (
+      <div className="rounded-lg border border-error bg-error-light p-4">
+        <p className="font-medium text-error-dark">Failed to load inbox.</p>
+        <button
+          type="button"
+          className="mt-3 rounded-md border border-border-default bg-surface-page px-3 py-1.5 text-sm"
+          onClick={() => void query.refetch()}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
   if (rows.length === 0) {
-    return <div className="rounded border p-4">No conversations yet.</div>;
+    return (
+      <EmptyState
+        title="No conversations yet"
+        description="Messages from your customers will appear here."
+      />
+    );
   }
 
   return (

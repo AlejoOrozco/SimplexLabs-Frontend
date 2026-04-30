@@ -12,6 +12,7 @@ import { useAuth } from '@/context/auth-context';
 import * as authApi from '@/lib/api/auth.api';
 import { ApiClientError } from '@/lib/api/client';
 import { loginSchema, type LoginDto } from '@/lib/schemas/auth.schema';
+import { notify } from '@/lib/toast';
 
 export function LoginForm(): JSX.Element {
   const { login } = useAuth();
@@ -21,12 +22,18 @@ export function LoginForm(): JSX.Element {
   const form = useForm<LoginDto>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
   });
 
   const onSubmit = async (values: LoginDto): Promise<void> => {
     setApiError(null);
     try {
-      await login(values);
+      await notify.promise(login(values), {
+        loading: 'Signing in...',
+        success: 'Welcome back',
+        error: (error) => (error instanceof Error ? error.message : 'Login failed'),
+      });
     } catch (error) {
       const message =
         error instanceof ApiClientError
@@ -43,6 +50,7 @@ export function LoginForm(): JSX.Element {
     setIsOauthLoading(true);
     try {
       const { url } = await authApi.getGoogleOAuthUrl();
+      notify.info('Redirecting to Google');
       window.location.href = url;
     } catch (error) {
       const message =

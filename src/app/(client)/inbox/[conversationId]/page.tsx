@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { SkeletonCard } from '@/components/shared/Skeleton';
 import { AgentRunInspector } from '@/features/conversations/components/agent-run-inspector';
 import { MessageBubble } from '@/features/conversations/components/message-bubble';
 import { TakeoverDialog } from '@/features/conversations/components/takeover-dialog';
 import { useConversationThread } from '@/features/conversations/hooks/use-conversation-thread';
 import { sendConversationMessage } from '@/features/conversations/api/conversations.api';
+import { notify } from '@/lib/toast';
 
 interface ThreadPageProps {
   params: { conversationId: string };
@@ -17,10 +20,24 @@ export default function ConversationThreadPage({ params }: ThreadPageProps): JSX
   const [isSending, setIsSending] = useState(false);
 
   if (conversationQuery.isLoading || messagesQuery.isLoading) {
-    return <div className="animate-pulse rounded border p-4">Loading conversation...</div>;
+    return <SkeletonCard />;
   }
   if (conversationQuery.isError || messagesQuery.isError || !conversationQuery.data || !messagesQuery.data) {
-    return <div className="rounded border border-red-200 bg-red-50 p-4">Failed to load conversation.</div>;
+    return (
+      <div className="rounded-lg border border-error bg-error-light p-4">
+        <p className="font-medium text-error-dark">Failed to load conversation.</p>
+        <button
+          type="button"
+          className="mt-3 rounded-md border border-border-default bg-surface-page px-3 py-1.5 text-sm"
+          onClick={() => {
+            void conversationQuery.refetch();
+            void messagesQuery.refetch();
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   const canReply = conversationQuery.data.controlMode === 'HUMAN';
@@ -29,8 +46,13 @@ export default function ConversationThreadPage({ params }: ThreadPageProps): JSX
     if (!canReply || content.trim().length === 0 || isSending) return;
     setIsSending(true);
     try {
-      await sendConversationMessage(params.conversationId, content.trim());
+      await notify.promise(sendConversationMessage(params.conversationId, content.trim()), {
+        loading: 'Sending message...',
+        success: 'Message sent',
+        error: (error) => (error instanceof Error ? error.message : 'Failed to send message'),
+      });
       setContent('');
+      void messagesQuery.refetch();
     } finally {
       setIsSending(false);
     }
@@ -44,9 +66,11 @@ export default function ConversationThreadPage({ params }: ThreadPageProps): JSX
           <p className="text-xs text-slate-500">{conversationQuery.data.lifecycleStatus}</p>
         </div>
         <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto rounded border p-3">
-          {messagesQuery.data.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))}
+          {messagesQuery.data.length === 0 ? (
+            <EmptyState title="No messages yet" description="Send a message to start the thread." />
+          ) : (
+            messagesQuery.data.map((message) => <MessageBubble key={message.id} message={message} />)
+          )}
         </div>
         <div className="rounded border p-3">
           <textarea

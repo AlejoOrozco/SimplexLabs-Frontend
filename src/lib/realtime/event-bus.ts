@@ -1,5 +1,6 @@
 type EventMap = {
   'session:expired': { reason: string };
+  'auth:forbidden': undefined;
   'socket:connected': undefined;
   'socket:disconnected': undefined;
   'socket:reconnected': undefined;

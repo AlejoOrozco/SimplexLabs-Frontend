@@ -61,10 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   useEffect(() => {
     setAuthFailureHandler(() => {
       clearSession();
-      router.replace('/login');
     });
     return () => setAuthFailureHandler(null);
-  }, [clearSession, router]);
+  }, [clearSession]);
 
   const login = useCallback<AuthContextValue['login']>(
     async (dto) => {

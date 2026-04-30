@@ -85,6 +85,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const method = options.method ?? 'GET';
   const url = buildUrl(path, options.query);
   const canRetry5xx = options.isIdempotent || IDEMPOTENT_METHODS.has(method);
+  let hasRetriedAfterRefresh = false;
 
   let attempt = 0;
   while (attempt < 4) {
@@ -92,14 +93,27 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
       return await executeFetch<T>(url, options, correlationId);
     } catch (error) {
       if (!(error instanceof ApiError)) throw error;
-      if (error.statusCode === 401 && path !== endpoints.auth.refresh.path) {
-        const refreshed = await maybeRefresh();
-        if (!refreshed) {
-          eventBus.emit('session:expired', { reason: 'refresh_failed' });
+      if (error.statusCode === 403) {
+        eventBus.emit('auth:forbidden', undefined);
+        throw error;
+      }
+      if (error.statusCode === 401) {
+        if (path === endpoints.auth.refresh.path) {
+          eventBus.emit('session:expired', { reason: 'refresh_unauthorized' });
           throw error;
         }
-        attempt += 1;
-        continue;
+        if (!hasRetriedAfterRefresh) {
+          const refreshed = await maybeRefresh();
+          if (!refreshed) {
+            eventBus.emit('session:expired', { reason: 'refresh_failed' });
+            throw error;
+          }
+          hasRetriedAfterRefresh = true;
+          attempt += 1;
+          continue;
+        }
+        eventBus.emit('session:expired', { reason: 'request_unauthorized_after_refresh' });
+        throw error;
       }
       if (error.statusCode === 429) throw error;
       if (error.statusCode >= 500 && canRetry5xx && attempt < 3) {
@@ -218,7 +232,12 @@ function createApiClient(): AxiosInstance {
       const originalRequest = error.config as RetriableRequestConfig | undefined;
 
       const isUnauthorized = error.response?.status === 401;
+      const isForbidden = error.response?.status === 403;
       const isRefreshCall = originalRequest?.url?.includes('/auth/refresh');
+
+       if (isForbidden) {
+        eventBus.emit('auth:forbidden', undefined);
+      }
 
       if (isUnauthorized && originalRequest && !originalRequest._retry && !isRefreshCall) {
         originalRequest._retry = true;
@@ -226,12 +245,23 @@ function createApiClient(): AxiosInstance {
           await instance.post('/auth/refresh');
           return instance(originalRequest);
         } catch (refreshError) {
+          eventBus.emit('session:expired', { reason: 'refresh_failed' });
           if (onAuthFailure) onAuthFailure();
           const details = extractErrorMessage(
             refreshError instanceof AxiosError ? refreshError : error,
           );
           throw new ApiClientError(details.message, 401, details.code, details.details);
         }
+      }
+
+      if (isUnauthorized && isRefreshCall) {
+        eventBus.emit('session:expired', { reason: 'refresh_unauthorized' });
+        if (onAuthFailure) onAuthFailure();
+      }
+
+      if (isUnauthorized && (!originalRequest || originalRequest._retry === true)) {
+        eventBus.emit('session:expired', { reason: 'request_unauthorized_after_refresh' });
+        if (onAuthFailure) onAuthFailure();
       }
 
       const details = extractErrorMessage(error);
