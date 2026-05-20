@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/shared/DataTable';
 import type { User } from '@/lib/types';
-import { formatDate, fullName, roleLabel } from '@/lib/utils/format';
+import { formatDate, fullName, sessionRoleLabel } from '@/lib/utils/format';
 
 interface UserListProps {
   users: readonly User[];
@@ -14,7 +14,7 @@ export function UserList({ users, onRowClick }: UserListProps): JSX.Element {
   const columns: readonly DataTableColumn<User>[] = [
     { id: 'name', header: 'Name', cell: (row) => <span className="font-medium">{fullName(row)}</span> },
     { id: 'email', header: 'Email', cell: (row) => row.email },
-    { id: 'role', header: 'Role', cell: (row) => roleLabel(row.role) },
+    { id: 'role', header: 'Role', cell: (row) => sessionRoleLabel(row.role) },
     {
       id: 'isActive',
       header: 'Status',

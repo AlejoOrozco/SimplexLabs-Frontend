@@ -12,6 +12,7 @@ interface PromiseMessages<T> {
 interface NotifyOptions {
   description?: string;
   duration?: number;
+  closeButton?: boolean;
   action?: {
     label: string;
     onClick: () => void;
@@ -20,17 +21,33 @@ interface NotifyOptions {
 
 export const notify = {
   success: (message: string, options?: NotifyOptions): string | number =>
-    toast.success(message, { description: options?.description, duration: options?.duration ?? 4000 }),
+    toast.success(message, {
+      description: options?.description,
+      duration: options?.duration ?? 4000,
+      action: options?.action,
+      closeButton: options?.closeButton,
+    }),
   error: (message: string, options?: NotifyOptions): string | number =>
-    toast.error(message, { description: options?.description, duration: options?.duration ?? 8000 }),
+    toast.error(message, {
+      description: options?.description,
+      duration: options?.duration ?? 8000,
+      action: options?.action,
+      closeButton: options?.closeButton,
+    }),
   warning: (message: string, options?: NotifyOptions): string | number =>
     toast.warning(message, {
       description: options?.description,
       duration: options?.duration ?? 6000,
       action: options?.action,
+      closeButton: options?.closeButton,
     }),
   info: (message: string, options?: NotifyOptions): string | number =>
-    toast.info(message, { description: options?.description, duration: options?.duration ?? 4000 }),
+    toast.info(message, {
+      description: options?.description,
+      duration: options?.duration ?? 4000,
+      action: options?.action,
+      closeButton: options?.closeButton,
+    }),
   loading: (message: string, options?: NotifyOptions): string | number =>
     toast.loading(message, {
       description: options?.description,

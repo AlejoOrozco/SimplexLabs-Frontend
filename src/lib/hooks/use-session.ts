@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import * as authApi from '@/lib/api/auth.api';
+import { ApiClientError } from '@/lib/api/client';
 import { useIdleTimer } from '@/lib/hooks/use-idle-timer';
 import { eventBus } from '@/lib/realtime/event-bus';
 import { notify } from '@/lib/toast';
@@ -25,8 +26,9 @@ export function useSession(enabled = true): void {
       dismissWarning();
       notify.success('Session refreshed');
       resetRef.current?.();
-    } catch {
+    } catch (error) {
       dismissWarning();
+      if (error instanceof ApiClientError && error.code === 'ACCOUNT_DEACTIVATED') return;
       eventBus.emit('session:expired', { reason: 'refresh_failed' });
     }
   }, [dismissWarning]);

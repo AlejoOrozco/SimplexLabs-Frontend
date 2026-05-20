@@ -52,3 +52,39 @@ export function useDeleteAppointment() {
     },
   });
 }
+
+export function useConfirmAppointment() {
+  const qc = useQueryClient();
+  return useMutation<Appointment, Error, string>({
+    mutationFn: api.confirmAppointment,
+    onSuccess: (_, id) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.list() });
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.detail(id) });
+    },
+  });
+}
+
+export function useRequestAppointmentCallback() {
+  const qc = useQueryClient();
+  return useMutation<Appointment, Error, string>({
+    mutationFn: api.requestAppointmentCallback,
+    onSuccess: (_, id) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.list() });
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.detail(id) });
+    },
+  });
+}
+
+export function useMarkAppointmentCallbackHandled(companyId?: string) {
+  const qc = useQueryClient();
+  return useMutation<Appointment, Error, string>({
+    mutationFn: api.markAppointmentCallbackHandled,
+    onSuccess: (_, id) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.list() });
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.detail(id) });
+      if (companyId) {
+        void qc.invalidateQueries({ queryKey: ['admin', 'company', companyId, 'appointments'] });
+      }
+    },
+  });
+}

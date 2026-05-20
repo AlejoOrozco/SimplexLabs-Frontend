@@ -1,7 +1,13 @@
 import { z } from 'zod';
 import { listQuerySchema, paginatedResponseSchema } from '@/lib/api/pagination';
 
-const roleSchema = z.enum(['CLIENT', 'SUPER_ADMIN']);
+const roleSchema = z.enum([
+  'CLIENT',
+  'SUPER_ADMIN',
+  'SIMPLEX_STAFF',
+  'COMPANY_ADMIN',
+  'COMPANY_STAFF',
+]);
 const senderTypeSchema = z.enum(['CONTACT', 'AGENT', 'HUMAN']);
 const controlModeSchema = z.enum(['AGENT', 'HUMAN']);
 const channelSchema = z.enum(['WHATSAPP', 'INSTAGRAM', 'MESSENGER']);
@@ -109,13 +115,6 @@ export const endpoints = {
       path: '/auth/login',
       method: 'POST',
       body: z.object({ email: z.string().email(), password: z.string().min(8) }),
-      response: sessionSchema,
-      isIdempotent: false,
-    }),
-    register: endpoint({
-      path: '/auth/register',
-      method: 'POST',
-      body: z.object({ email: z.string().email(), password: z.string().min(8), firstName: z.string(), lastName: z.string() }),
       response: sessionSchema,
       isIdempotent: false,
     }),

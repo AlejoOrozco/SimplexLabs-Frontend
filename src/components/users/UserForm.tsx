@@ -15,9 +15,10 @@ import {
 } from '@/components/ui/select';
 import { FormError } from '@/components/shared/FormError';
 import { ApiClientError } from '@/lib/api/client';
+import { SESSION_ROLES_LIST } from '@/lib/auth/session-role-utils';
 import { createUserSchema, type CreateUserDto } from '@/lib/schemas/user.schema';
-import { Role, type Company } from '@/lib/types';
-import { roleLabel } from '@/lib/utils/format';
+import type { Company } from '@/lib/types';
+import { sessionRoleLabel } from '@/lib/utils/format';
 
 interface UserFormProps {
   companies: readonly Company[];
@@ -48,7 +49,7 @@ export function UserForm({
       password: '',
       firstName: '',
       lastName: '',
-      role: Role.CLIENT,
+      role: 'CLIENT',
       companyId: null,
       isActive: true,
       ...defaultValues,
@@ -99,9 +100,9 @@ export function UserForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[Role.SUPER_ADMIN, Role.CLIENT].map((r) => (
+                {SESSION_ROLES_LIST.map((r) => (
                   <SelectItem key={r} value={r}>
-                    {roleLabel(r)}
+                    {sessionRoleLabel(r)}
                   </SelectItem>
                 ))}
               </SelectContent>

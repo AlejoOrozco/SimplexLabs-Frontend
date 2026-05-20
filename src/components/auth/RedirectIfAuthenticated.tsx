@@ -11,7 +11,7 @@ interface RedirectIfAuthenticatedProps {
 }
 
 // Sends already-authenticated users to the dashboard so they don't see the
-// login/register form. Complements the client-side guard in DashboardLayout
+// Login flow. Complements the client-side guard in DashboardLayout
 // now that middleware no longer performs this check.
 export function RedirectIfAuthenticated({
   children,

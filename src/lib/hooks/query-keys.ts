@@ -1,10 +1,20 @@
 import type { Channel } from '@/lib/types';
 
 export const queryKeys = {
+  admin: {
+    all: ['admin'] as const,
+    agentFailures: () => [...queryKeys.admin.all, 'agent-failures'] as const,
+    failedTasks: () => [...queryKeys.admin.all, 'failed-tasks'] as const,
+  },
   appointments: {
     all: ['appointments'] as const,
     list: () => [...queryKeys.appointments.all, 'list'] as const,
     detail: (id: string) => [...queryKeys.appointments.all, 'detail', id] as const,
+  },
+  calendar: {
+    all: ['calendar'] as const,
+    events: (key: unknown) => [...queryKeys.calendar.all, 'events', key] as const,
+    staff: () => [...queryKeys.calendar.all, 'staff'] as const,
   },
   conversations: {
     all: ['conversations'] as const,
@@ -27,6 +37,7 @@ export const queryKeys = {
   websites: {
     all: ['websites'] as const,
     list: () => [...queryKeys.websites.all, 'list'] as const,
+    adminList: (companyId: string) => [...queryKeys.websites.all, 'admin', companyId] as const,
     detail: (id: string) => [...queryKeys.websites.all, 'detail', id] as const,
   },
   contacts: {

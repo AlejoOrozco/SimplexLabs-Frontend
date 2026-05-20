@@ -1,13 +1,11 @@
 import { apiGet, apiPost } from '@/lib/api/client';
-import type { LoginDto, RegisterDto } from '@/lib/schemas/auth.schema';
+import { normalizeAuthenticatedUser } from '@/lib/auth/normalize-authenticated-user';
+import type { LoginDto } from '@/lib/schemas/auth.schema';
 import type { AuthenticatedUser } from '@/lib/types';
 
 export async function login(dto: LoginDto): Promise<AuthenticatedUser> {
-  return apiPost<AuthenticatedUser, LoginDto>('/auth/login', dto);
-}
-
-export async function register(dto: RegisterDto): Promise<AuthenticatedUser> {
-  return apiPost<AuthenticatedUser, RegisterDto>('/auth/register', dto);
+  const raw = await apiPost<unknown, LoginDto>('/auth/login', dto);
+  return normalizeAuthenticatedUser(raw);
 }
 
 export async function refresh(): Promise<void> {
@@ -19,7 +17,13 @@ export async function logout(): Promise<void> {
 }
 
 export async function getMe(): Promise<AuthenticatedUser> {
-  return apiGet<AuthenticatedUser>('/auth/me');
+  const raw = await apiGet<unknown>('/auth/me');
+  return normalizeAuthenticatedUser(raw);
+}
+
+export async function markFirstLoginComplete(): Promise<AuthenticatedUser> {
+  const raw = await apiPost<unknown, Record<string, never>>('/auth/first-login-complete', {});
+  return normalizeAuthenticatedUser(raw);
 }
 
 export async function getGoogleOAuthUrl(): Promise<{ url: string }> {
@@ -27,7 +31,8 @@ export async function getGoogleOAuthUrl(): Promise<{ url: string }> {
 }
 
 export async function handleOAuthCallback(accessToken: string): Promise<AuthenticatedUser> {
-  return apiPost<AuthenticatedUser>(
+  const raw = await apiPost<unknown>(
     `/auth/oauth/callback?access_token=${encodeURIComponent(accessToken)}`,
   );
+  return normalizeAuthenticatedUser(raw);
 }

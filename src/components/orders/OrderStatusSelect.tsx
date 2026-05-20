@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FormError } from '@/components/shared/FormError';
+import { PermissionGate } from '@/components/shared/permission-gate';
 import { ApiClientError } from '@/lib/api/client';
 import { ORDER_STATUS_TRANSITIONS, type OrderStatus } from '@/lib/types';
 import { orderStatusLabel } from '@/lib/utils/format';
@@ -47,23 +48,30 @@ export function OrderStatusSelect({
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Select value={next} onValueChange={(v) => setNext(v as OrderStatus)}>
-        <SelectTrigger className="w-48">
-          <SelectValue placeholder="Move to…" />
-        </SelectTrigger>
-        <SelectContent>
-          {allowed.map((s) => (
-            <SelectItem key={s} value={s}>
-              {orderStatusLabel(s)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button type="button" size="sm" disabled={!next || isSaving} onClick={handleApply}>
-        {isSaving ? 'Saving…' : 'Apply'}
-      </Button>
-      <FormError message={error} />
-    </div>
+    <PermissionGate
+      permission="company.orders.manage"
+      fallback={
+        <p className="text-sm text-gray-600">You do not have permission to change order status.</p>
+      }
+    >
+      <div className="flex items-center gap-2">
+        <Select value={next} onValueChange={(v) => setNext(v as OrderStatus)}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Move to…" />
+          </SelectTrigger>
+          <SelectContent>
+            {allowed.map((s) => (
+              <SelectItem key={s} value={s}>
+                {orderStatusLabel(s)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button type="button" size="sm" disabled={!next || isSaving} onClick={handleApply}>
+          {isSaving ? 'Saving…' : 'Apply'}
+        </Button>
+        <FormError message={error} />
+      </div>
+    </PermissionGate>
   );
 }

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { AppShell } from '@/components/layouts/app-shell';
 import { requireClientSession } from '@/lib/auth/guards';
+import { isPlatformOperatorRole } from '@/lib/auth/session-role-utils';
 import { fullName } from '@/lib/utils/format';
 
 export default async function ClientLayout({ children }: { children: ReactNode }): Promise<JSX.Element> {
@@ -14,10 +15,10 @@ export default async function ClientLayout({ children }: { children: ReactNode }
   return (
     <AppShell
       session={{
-        isAdmin: session.role === 'SUPER_ADMIN',
+        isAdmin: isPlatformOperatorRole(session.role),
         userName,
         userEmail: null,
-        companyName: session.companyId,
+        companyName: null,
         subscriptionPlan: null,
       }}
     >

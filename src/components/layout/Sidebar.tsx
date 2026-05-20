@@ -3,17 +3,36 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ChevronLeft, ChevronRight, FlaskConical } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, FlaskConical, Plus } from 'lucide-react';
 import { getNavSections } from '@/components/layout/nav-config';
+import { SidebarSessionFooter } from '@/components/layout/sidebar-session-footer';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils/cn';
 
 interface SidebarProps {
   isAdmin: boolean;
   isCollapsed: boolean;
   onToggleCollapsed: () => void;
+  session: {
+    userName: string;
+    userEmail: string | null;
+    companyName: string | null;
+    subscriptionPlan: string | null;
+  };
 }
 
-export function Sidebar({ isAdmin, isCollapsed, onToggleCollapsed }: SidebarProps): JSX.Element {
+export function Sidebar({
+  isAdmin,
+  isCollapsed,
+  onToggleCollapsed,
+  session,
+}: SidebarProps): JSX.Element {
   const pathname = usePathname();
   const { primary, admin } = getNavSections(isAdmin);
   const width = isCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)';
@@ -26,6 +45,7 @@ export function Sidebar({ isAdmin, isCollapsed, onToggleCollapsed }: SidebarProp
       <Link
         key={item.href}
         href={item.href}
+        data-tour={item.tourTarget}
         aria-current={isActive ? 'page' : undefined}
         title={isCollapsed ? item.label : undefined}
         className={cn(
@@ -48,12 +68,12 @@ export function Sidebar({ isAdmin, isCollapsed, onToggleCollapsed }: SidebarProp
   };
 
   return (
-    <motion.aside
-      aria-label="Primary"
-      className="relative flex h-screen shrink-0 flex-col border-r border-border-default bg-surface-page p-3"
-      animate={{ width }}
-      transition={{ type: 'spring', stiffness: 240, damping: 26, mass: 0.7 }}
-    >
+    <aside aria-label="Primary" className="h-full self-stretch">
+      <motion.div
+        className="relative flex h-full shrink-0 flex-col border-r border-border-default bg-surface-page p-3"
+        animate={{ width }}
+        transition={{ type: 'spring', stiffness: 240, damping: 26, mass: 0.7 }}
+      >
       <div
         className={cn(
           'mb-4 flex h-10 items-center rounded-md border border-border-default bg-surface-raised px-2',
@@ -68,10 +88,63 @@ export function Sidebar({ isAdmin, isCollapsed, onToggleCollapsed }: SidebarProp
 
       {admin.length > 0 ? (
         <div className="mb-3 mt-3 border-t border-border-default pt-3">
-          {!isCollapsed ? <p className="mb-2 px-3 text-xs font-medium text-text-secondary">Admin</p> : null}
+          {!isCollapsed ? (
+            <div className="mb-2 flex items-center justify-between gap-2 px-3">
+              <p className="text-xs font-medium text-text-secondary">Admin</p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm" className="h-8 gap-1 px-2 text-xs">
+                    Create
+                    <ChevronDown className="size-3 opacity-70" aria-hidden />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[10rem]">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/onboarding">New user</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/companies/create">New company</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <div className="mb-2 flex justify-center px-1">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-9 shrink-0"
+                    title="Create"
+                    aria-label="Create menu"
+                  >
+                    <Plus size={16} aria-hidden />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="right" align="start" className="min-w-[10rem]">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/onboarding">New user</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/companies/create">New company</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
           <nav className="flex flex-col gap-1">{admin.map(renderNavItem)}</nav>
         </div>
       ) : null}
+
+      <SidebarSessionFooter
+        isCollapsed={isCollapsed}
+        userName={session.userName}
+        userEmail={session.userEmail}
+        companyName={session.companyName}
+        subscriptionPlan={session.subscriptionPlan}
+      />
 
       <button
         type="button"
@@ -85,6 +158,7 @@ export function Sidebar({ isAdmin, isCollapsed, onToggleCollapsed }: SidebarProp
         {isCollapsed ? <ChevronRight size={16} aria-hidden /> : <ChevronLeft size={16} aria-hidden />}
         {!isCollapsed ? <span className="text-sm">Collapse</span> : null}
       </button>
-    </motion.aside>
+      </motion.div>
+    </aside>
   );
 }

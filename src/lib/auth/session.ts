@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { endpoints, type Session } from '@/lib/api/endpoints';
+import { normalizeServerSessionPayload } from '@/lib/auth/normalize-server-session';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
@@ -18,6 +19,6 @@ export async function getServerSession(): Promise<Session | null> {
   });
 
   if (!response.ok) return null;
-  const envelope = (await response.json()) as { data?: Session };
-  return envelope.data ?? null;
+  const envelope: unknown = await response.json();
+  return normalizeServerSessionPayload(envelope);
 }

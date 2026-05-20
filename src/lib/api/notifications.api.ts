@@ -23,9 +23,11 @@ export async function getNotifications(limit = 20): Promise<Notification[]> {
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
-  const response = await apiGet<{ count: number } | { unreadCount: number }>('/notifications/unread-count');
-  if ('count' in response) return response.count;
-  if ('unreadCount' in response) return response.unreadCount;
+  const response = await apiGet<Notification[] | PaginatedNotifications>('/notifications', {
+    params: { unread: true, limit: 1, offset: 0 },
+  });
+  if (Array.isArray(response)) return response.length;
+  if (isPaginatedNotifications(response)) return response.total;
   return 0;
 }
 

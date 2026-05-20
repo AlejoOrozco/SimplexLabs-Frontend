@@ -1,19 +1,22 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { DollarSign, MessageCircle, ShoppingCart, CalendarDays } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { SkeletonCard, SkeletonStat } from '@/components/shared/Skeleton';
-import { apiGet } from '@/lib/api/client';
-import * as authApi from '@/lib/api/auth.api';
+import { useAuth } from '@/context/auth-context';
+import { getClientDashboardStats } from '@/lib/api/client-dashboard.api';
+import { readAuthProfile } from '@/lib/auth/profile-cache';
+import { isPlatformOperatorRole } from '@/lib/auth/session-role-utils';
 import { getAppointments } from '@/lib/api/appointments.api';
-import { getCompanies } from '@/lib/api/companies.api';
 import { getConversations } from '@/lib/api/conversations.api';
 import { getOrders } from '@/lib/api/orders.api';
 import { getProducts } from '@/lib/api/products.api';
 import { getUsers } from '@/lib/api/users.api';
+import { apiGet } from '@/lib/api/client';
 import type { Payment } from '@/lib/api/endpoints';
 import { formatCurrency, formatDateTime } from '@/lib/utils/format';
 
@@ -43,13 +46,29 @@ function isCurrentMonth(dateValue: string): boolean {
 }
 
 export default function DashboardPage(): JSX.Element {
+  const router = useRouter();
   const [showAllSet, setShowAllSet] = useState(false);
+  const cachedProfile = readAuthProfile();
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
 
-  const meQuery = useQuery({
-    queryKey: ['auth', 'me'],
-    queryFn: authApi.getMe,
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) return;
+    if (isPlatformOperatorRole(user.roleName)) {
+      router.replace('/admin');
+    }
+  }, [authLoading, user, router]);
+
+  const tenantSession = Boolean(user && !isPlatformOperatorRole(user.roleName));
+
+  const clientStatsQuery = useQuery({
+    queryKey: ['dashboard', 'company-stats'],
+    queryFn: getClientDashboardStats,
+    enabled: isAuthenticated && tenantSession,
+    staleTime: 30_000,
+    retry: 1,
   });
-  const companiesQuery = useQuery({ queryKey: ['companies'], queryFn: getCompanies });
+
   const ordersQuery = useQuery({ queryKey: ['orders'], queryFn: getOrders });
   const appointmentsQuery = useQuery({ queryKey: ['appointments'], queryFn: getAppointments });
   const conversationsQuery = useQuery({
@@ -64,8 +83,7 @@ export default function DashboardPage(): JSX.Element {
   });
 
   const isLoading =
-    meQuery.isLoading ||
-    companiesQuery.isLoading ||
+    authLoading ||
     ordersQuery.isLoading ||
     appointmentsQuery.isLoading ||
     conversationsQuery.isLoading ||
@@ -74,8 +92,6 @@ export default function DashboardPage(): JSX.Element {
     paymentsQuery.isLoading;
 
   const isError =
-    meQuery.isError ||
-    companiesQuery.isError ||
     ordersQuery.isError ||
     appointmentsQuery.isError ||
     conversationsQuery.isError ||
@@ -90,18 +106,25 @@ export default function DashboardPage(): JSX.Element {
     const users = usersQuery.data ?? [];
     const products = productsQuery.data ?? [];
     const payments = paymentsQuery.data ?? [];
-    const companies = companiesQuery.data ?? [];
+    const stats = clientStatsQuery.data;
 
-    const revenueThisMonth = payments
-      .filter((payment) => payment.status === 'CONFIRMED' && isCurrentMonth(payment.createdAt))
-      .reduce((sum, payment) => sum + payment.amount, 0);
+    const revenueThisMonth = stats
+      ? stats.revenueThisMonthCents / 100
+      : payments
+          .filter((payment) => payment.status === 'CONFIRMED' && isCurrentMonth(payment.createdAt))
+          .reduce((sum, payment) => sum + payment.amount, 0);
 
-    const pendingOrders = orders.filter(
-      (order) => order.status === 'PENDING' || order.status === 'CONFIRMED',
-    ).length;
+    const pendingOrders = stats
+      ? stats.pendingOrders
+      : orders.filter((order) => order.status === 'PENDING' || order.status === 'CONFIRMED').length;
 
-    const appointmentsToday = appointments.filter((appointment) => isToday(appointment.scheduledAt)).length;
-    const openConversations = conversations.filter((conversation) => conversation.status !== 'CLOSED').length;
+    const appointmentsToday = stats
+      ? stats.appointmentsToday
+      : appointments.filter((appointment) => isToday(appointment.scheduledAt)).length;
+
+    const openConversations = stats
+      ? stats.openConversations
+      : conversations.filter((conversation) => conversation.status !== 'CLOSED').length;
 
     const recentConversations = [...conversations]
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -115,7 +138,12 @@ export default function DashboardPage(): JSX.Element {
     const checklistItems = [
       { key: 'product', label: 'Add your first product or service', done: products.length > 0, href: '/orders' },
       { key: 'agent', label: 'Configure your AI agent', done: false, href: '/settings/agent/profile' },
-      { key: 'knowledge', label: 'Add your business knowledge base', done: false, href: '/settings/agent/knowledge-base' },
+      {
+        key: 'knowledge',
+        label: 'Add your business knowledge base',
+        done: false,
+        href: '/settings/agent/knowledge-base',
+      },
       { key: 'staff', label: 'Invite a staff member', done: users.length > 1, href: '/staff' },
       {
         key: 'whatsapp',
@@ -126,7 +154,7 @@ export default function DashboardPage(): JSX.Element {
     ] as const;
 
     const allChecklistDone = checklistItems.every((item) => item.done);
-    const companyName = companies[0]?.name ?? 'your company';
+    const companyName = user?.company?.name ?? 'your company';
 
     return {
       revenueThisMonth,
@@ -142,12 +170,13 @@ export default function DashboardPage(): JSX.Element {
     };
   }, [
     appointmentsQuery.data,
-    companiesQuery.data,
+    clientStatsQuery.data,
     conversationsQuery.data,
     ordersQuery.data,
     paymentsQuery.data,
     productsQuery.data,
     usersQuery.data,
+    user?.company?.name,
   ]);
 
   useEffect(() => {
@@ -160,8 +189,23 @@ export default function DashboardPage(): JSX.Element {
   }, [data]);
 
   const greeting = getGreeting(new Date().getHours());
-  const firstName = meQuery.data?.firstName ?? 'there';
+  const firstName = user?.firstName ?? cachedProfile?.firstName ?? 'User';
   const hideChecklistForever = typeof window !== 'undefined' && localStorage.getItem(CHECKLIST_DONE_KEY) === '1';
+
+  if (authLoading || !user || isPlatformOperatorRole(user.roleName)) {
+    return (
+      <section className="space-y-6">
+        <div className="space-y-2">
+          <SkeletonCard />
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <SkeletonStat key={index} />
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -190,10 +234,13 @@ export default function DashboardPage(): JSX.Element {
     <section className="space-y-6">
       <header>
         <h2 className="text-2xl font-semibold text-text-primary">
-          {greeting} {firstName} <span aria-hidden>👋</span>
+          {greeting}, {firstName} <span aria-hidden>👋</span>
         </h2>
         <p className="mt-1 text-sm text-text-secondary">
           Here&apos;s what&apos;s happening at {data.companyName} today.
+          {user?.company?.isPlatformOwner ? (
+            <span className="ml-1 text-xs text-text-secondary">(Platform owner tenant)</span>
+          ) : null}
         </p>
       </header>
 
@@ -270,7 +317,8 @@ export default function DashboardPage(): JSX.Element {
             {data.checklistItems.map((item) => (
               <li key={item.key} className="flex items-center justify-between rounded-md border border-border-default px-3 py-2">
                 <span className={item.done ? 'text-text-secondary line-through' : 'text-text-primary'}>
-                  {item.done ? 'Done: ' : ''}{item.label}
+                  {item.done ? 'Done: ' : ''}
+                  {item.label}
                 </span>
                 {!item.done ? (
                   <Link href={item.href} className="text-sm text-text-brand underline">

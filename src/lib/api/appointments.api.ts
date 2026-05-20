@@ -27,3 +27,15 @@ export async function updateAppointment(
 export async function deleteAppointment(id: string): Promise<void> {
   await apiDelete<void>(`/appointments/${id}`);
 }
+
+export async function confirmAppointment(id: string): Promise<Appointment> {
+  return apiPost<Appointment>(`/appointments/${id}/confirm`);
+}
+
+export async function requestAppointmentCallback(id: string): Promise<Appointment> {
+  return apiPost<Appointment>(`/appointments/${id}/request-callback`);
+}
+
+export async function markAppointmentCallbackHandled(id: string): Promise<Appointment> {
+  return apiPost<Appointment>(`/appointments/${id}/mark-callback-handled`);
+}

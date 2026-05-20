@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { Role } from '@/lib/types';
+import { SESSION_ROLES_LIST } from '@/lib/auth/session-role-utils';
 
 export const createUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   firstName: z.string().min(1).max(50),
   lastName: z.string().min(1).max(50),
-  role: z.nativeEnum(Role),
-  companyId: z.string().cuid().nullish(),
+  role: z.enum(SESSION_ROLES_LIST),
+  companyId: z.string().min(1).nullish(),
   isActive: z.boolean().default(true),
 });
 

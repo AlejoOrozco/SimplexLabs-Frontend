@@ -1,11 +1,18 @@
 import Link from 'next/link';
 import type { ConversationListItem } from '@/features/conversations/types';
 
-export function ConversationRow({ conversation }: { conversation: ConversationListItem }): JSX.Element {
+interface ConversationRowProps {
+  conversation: ConversationListItem;
+  /** When set, links to this URL instead of the default client inbox thread. */
+  threadHref?: string;
+}
+
+export function ConversationRow({ conversation, threadHref }: ConversationRowProps): JSX.Element {
   const contactName = `${conversation.contact.firstName} ${conversation.contact.lastName}`.trim();
+  const href = threadHref ?? `/inbox/${conversation.id}`;
   return (
     <Link
-      href={`/inbox/${conversation.id}`}
+      href={href}
       className="flex items-center justify-between rounded-lg border p-3 hover:bg-slate-50"
     >
       <div>

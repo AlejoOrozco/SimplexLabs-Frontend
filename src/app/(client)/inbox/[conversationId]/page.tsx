@@ -6,6 +6,7 @@ import { SkeletonCard } from '@/components/shared/Skeleton';
 import { AgentRunInspector } from '@/features/conversations/components/agent-run-inspector';
 import { MessageBubble } from '@/features/conversations/components/message-bubble';
 import { TakeoverDialog } from '@/features/conversations/components/takeover-dialog';
+import { PermissionGate } from '@/components/shared/permission-gate';
 import { useConversationThread } from '@/features/conversations/hooks/use-conversation-thread';
 import { sendConversationMessage } from '@/features/conversations/api/conversations.api';
 import { notify } from '@/lib/toast';
@@ -95,7 +96,11 @@ export default function ConversationThreadPage({ params }: ThreadPageProps): JSX
             {isSending ? 'Sending...' : 'Send'}
           </button>
         </div>
-        {!canReply && <TakeoverDialog conversationId={params.conversationId} />}
+        {!canReply ? (
+          <PermissionGate permission="company.conversations.take_control">
+            <TakeoverDialog conversationId={params.conversationId} />
+          </PermissionGate>
+        ) : null}
       </div>
       <AgentRunInspector conversationId={params.conversationId} />
     </section>

@@ -1,7 +1,6 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import { loginSchema, type LoginDto } from '@/lib/schemas/auth.schema';
 import { notify } from '@/lib/toast';
 
 export function LoginForm(): JSX.Element {
-  const { login } = useAuth();
+  const { login, isLoading: authSessionLoading } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
   const [isOauthLoading, setIsOauthLoading] = useState<boolean>(false);
 
@@ -28,13 +27,14 @@ export function LoginForm(): JSX.Element {
 
   const onSubmit = async (values: LoginDto): Promise<void> => {
     setApiError(null);
+    const loadingId = notify.loading('Signing in...');
     try {
-      await notify.promise(login(values), {
-        loading: 'Signing in...',
-        success: 'Welcome back',
-        error: (error) => (error instanceof Error ? error.message : 'Login failed'),
-      });
+      await login(values);
+      notify.dismiss(loadingId);
+      notify.success('Welcome back');
     } catch (error) {
+      notify.dismiss(loadingId);
+      if (error instanceof ApiClientError && error.code === 'ACCOUNT_DEACTIVATED') return;
       const message =
         error instanceof ApiClientError
           ? error.message
@@ -42,6 +42,7 @@ export function LoginForm(): JSX.Element {
             ? error.message
             : 'Login failed';
       setApiError(message);
+      notify.error(message);
     }
   };
 
@@ -94,7 +95,7 @@ export function LoginForm(): JSX.Element {
 
       <FormError message={apiError} />
 
-      <Button type="submit" disabled={isSubmitting} className="w-full">
+      <Button type="submit" disabled={isSubmitting || authSessionLoading} className="w-full">
         {isSubmitting ? 'Signing in…' : 'Sign in'}
       </Button>
 
@@ -107,13 +108,6 @@ export function LoginForm(): JSX.Element {
       >
         {isOauthLoading ? 'Redirecting…' : 'Continue with Google'}
       </Button>
-
-      <p className="text-center text-sm text-gray-600">
-        No account?{' '}
-        <Link href="/register" className="font-medium underline">
-          Register
-        </Link>
-      </p>
     </form>
   );
 }

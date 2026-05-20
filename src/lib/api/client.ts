@@ -1,7 +1,19 @@
 import { z } from 'zod';
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 import { endpoints, apiSuccessEnvelopeSchema } from '@/lib/api/endpoints';
 import { ApiError, normalizeApiError } from '@/lib/api/errors';
+import {
+  AccountDeactivatedError,
+  notifyAccountDeactivated,
+  parseAccountDeactivatedPayload,
+} from '@/lib/auth/account-deactivation';
 import { eventBus } from '@/lib/realtime/event-bus';
+import type { ApiResponse } from '@/lib/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -66,6 +78,13 @@ async function executeFetch<T>(url: string, options: ApiFetchOptions, correlatio
   }
 
   const errorJson: unknown = await response.json().catch(() => undefined);
+  if (response.status === 401) {
+    const deactivated = parseAccountDeactivatedPayload(errorJson);
+    if (deactivated) {
+      notifyAccountDeactivated(deactivated);
+      throw new AccountDeactivatedError(deactivated);
+    }
+  }
   throw normalizeApiError(errorJson, response.headers.get('retry-after'));
 }
 
@@ -75,7 +94,8 @@ async function maybeRefresh(): Promise<boolean> {
   try {
     await executeFetch(refreshUrl, { method: 'POST' }, correlationId);
     return true;
-  } catch {
+  } catch (error) {
+    if (error instanceof AccountDeactivatedError) throw error;
     return false;
   }
 }
@@ -92,6 +112,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     try {
       return await executeFetch<T>(url, options, correlationId);
     } catch (error) {
+      if (error instanceof AccountDeactivatedError) throw error;
       if (!(error instanceof ApiError)) throw error;
       if (error.statusCode === 403) {
         eventBus.emit('auth:forbidden', undefined);
@@ -135,13 +156,6 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     correlationId,
   });
 }
-import axios, {
-  AxiosError,
-  type AxiosInstance,
-  type AxiosRequestConfig,
-  type InternalAxiosRequestConfig,
-} from 'axios';
-import type { ApiResponse } from '@/lib/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -235,8 +249,22 @@ function createApiClient(): AxiosInstance {
       const isForbidden = error.response?.status === 403;
       const isRefreshCall = originalRequest?.url?.includes('/auth/refresh');
 
-       if (isForbidden) {
+      if (isForbidden) {
         eventBus.emit('auth:forbidden', undefined);
+      }
+
+      if (isUnauthorized) {
+        const deactivated = parseAccountDeactivatedPayload(error.response?.data);
+        if (deactivated) {
+          notifyAccountDeactivated(deactivated);
+          const details = extractErrorMessage(error);
+          throw new ApiClientError(
+            deactivated.message ?? details.message,
+            401,
+            'ACCOUNT_DEACTIVATED',
+            deactivated,
+          );
+        }
       }
 
       if (isUnauthorized && originalRequest && !originalRequest._retry && !isRefreshCall) {
@@ -245,6 +273,12 @@ function createApiClient(): AxiosInstance {
           await instance.post('/auth/refresh');
           return instance(originalRequest);
         } catch (refreshError) {
+          if (
+            refreshError instanceof ApiClientError &&
+            refreshError.code === 'ACCOUNT_DEACTIVATED'
+          ) {
+            throw refreshError;
+          }
           eventBus.emit('session:expired', { reason: 'refresh_failed' });
           if (onAuthFailure) onAuthFailure();
           const details = extractErrorMessage(
@@ -299,6 +333,15 @@ export async function apiPut<T, B = unknown>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   const response = await apiClient.put<T>(url, body, config);
+  return response.data;
+}
+
+export async function apiPatch<T, B = unknown>(
+  url: string,
+  body?: B,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.patch<T>(url, body, config);
   return response.data;
 }
 

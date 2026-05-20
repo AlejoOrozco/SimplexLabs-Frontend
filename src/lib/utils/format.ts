@@ -1,4 +1,5 @@
 import type {
+  AppointmentConfirmationStatus,
   AppointmentStatus,
   AppointmentType,
   Channel,
@@ -8,7 +9,7 @@ import type {
   OrderStatus,
   PlanFeatureType,
   ProductType,
-  Role,
+  SessionRoleName,
   SubStatus,
 } from '@/lib/types';
 
@@ -60,6 +61,11 @@ export function formatRelative(value: string | Date, locale: string = DEFAULT_LO
   return rtf.format(diffDays, 'day');
 }
 
+/** Short relative label for activity feeds (e.g. “2 hours ago”). */
+export function formatTimeAgo(value: string | Date, locale: string = DEFAULT_LOCALE): string {
+  return formatRelative(value, locale);
+}
+
 const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING: 'Pending',
   CONFIRMED: 'Confirmed',
@@ -79,6 +85,12 @@ const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
   SIMPLEX_WITH_CLIENT: 'Simplex ↔ client',
   CLIENT_WITH_CONTACT: 'Client ↔ contact',
   EXTERNAL: 'External',
+};
+
+const APPOINTMENT_CONFIRMATION_LABELS: Record<AppointmentConfirmationStatus, string> = {
+  PENDING: 'Pending your response',
+  CONFIRMED: 'Confirmed',
+  DECLINED: 'Declined',
 };
 
 const CONVO_STATUS_LABELS: Record<ConvoStatus, string> = {
@@ -112,8 +124,11 @@ const NICHE_LABELS: Record<Niche, string> = {
   ENTREPRENEUR: 'Entrepreneur',
 };
 
-const ROLE_LABELS: Record<Role, string> = {
-  SUPER_ADMIN: 'Admin',
+const SESSION_ROLE_LABELS: Record<SessionRoleName, string> = {
+  SUPER_ADMIN: 'Platform admin',
+  SIMPLEX_STAFF: 'Simplex staff',
+  COMPANY_ADMIN: 'Company admin',
+  COMPANY_STAFF: 'Company staff',
   CLIENT: 'Client',
 };
 
@@ -140,6 +155,10 @@ export function appointmentTypeLabel(type: AppointmentType): string {
   return APPOINTMENT_TYPE_LABELS[type];
 }
 
+export function appointmentConfirmationLabel(status: AppointmentConfirmationStatus): string {
+  return APPOINTMENT_CONFIRMATION_LABELS[status];
+}
+
 export function convoStatusLabel(status: ConvoStatus): string {
   return CONVO_STATUS_LABELS[status];
 }
@@ -160,8 +179,8 @@ export function nicheLabel(niche: Niche): string {
   return NICHE_LABELS[niche];
 }
 
-export function roleLabel(role: Role): string {
-  return ROLE_LABELS[role];
+export function sessionRoleLabel(role: SessionRoleName): string {
+  return SESSION_ROLE_LABELS[role];
 }
 
 export function productTypeLabel(type: ProductType): string {

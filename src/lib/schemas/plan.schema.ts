@@ -9,6 +9,7 @@ export const createPlanSchema = z.object({
   isActive: z.boolean().default(true),
   features: z.array(z.nativeEnum(PlanFeatureType)).default([]),
   channels: z.array(z.nativeEnum(Channel)).default([]),
+  description: z.string().max(500).nullish(),
 });
 
 export const updatePlanSchema = createPlanSchema.partial();

@@ -19,7 +19,7 @@ import {
   createSubscriptionSchema,
   type CreateSubscriptionDto,
 } from '@/lib/schemas/subscription.schema';
-import { type Company, type Plan, SubStatus } from '@/lib/types';
+import { type Plan, SubStatus } from '@/lib/types';
 import { formatCurrency, subStatusLabel } from '@/lib/utils/format';
 
 const STATUSES: readonly SubStatus[] = [
@@ -29,7 +29,6 @@ const STATUSES: readonly SubStatus[] = [
 ];
 
 interface SubscriptionFormProps {
-  companies: readonly Company[];
   plans: readonly Plan[];
   defaultValues?: Partial<CreateSubscriptionDto>;
   onSubmit: (values: CreateSubscriptionDto) => Promise<void>;
@@ -38,7 +37,6 @@ interface SubscriptionFormProps {
 }
 
 export function SubscriptionForm({
-  companies,
   plans,
   defaultValues,
   onSubmit,
@@ -55,7 +53,6 @@ export function SubscriptionForm({
   } = useForm<CreateSubscriptionDto>({
     resolver: zodResolver(createSubscriptionSchema),
     defaultValues: {
-      companyId: '',
       planId: '',
       status: SubStatus.ACTIVE,
       initialPayment: null,
@@ -76,29 +73,6 @@ export function SubscriptionForm({
 
   return (
     <form onSubmit={handleSubmit(submit)} noValidate className="space-y-4">
-      <div className="space-y-1.5">
-        <Label htmlFor="companyId">Company</Label>
-        <Controller
-          control={control}
-          name="companyId"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger id="companyId">
-                <SelectValue placeholder="Select company" />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        <FormError message={errors.companyId?.message} />
-      </div>
-
       <div className="space-y-1.5">
         <Label htmlFor="planId">Plan</Label>
         <Controller

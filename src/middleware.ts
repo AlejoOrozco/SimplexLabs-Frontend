@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PROTECTED_PREFIXES = [
+  '/admin',
   '/dashboard',
   '/inbox',
   '/appointments',
@@ -9,6 +10,7 @@ const PROTECTED_PREFIXES = [
   '/payments',
   '/notifications',
   '/settings',
+  '/websites',
   '/failed-tasks',
   '/companies',
   '/health',
@@ -28,6 +30,7 @@ export function middleware(request: NextRequest): NextResponse {
 
 export const config = {
   matcher: [
+    '/admin/:path*',
     '/dashboard/:path*',
     '/inbox/:path*',
     '/appointments/:path*',
@@ -36,6 +39,7 @@ export const config = {
     '/payments/:path*',
     '/notifications/:path*',
     '/settings/:path*',
+    '/websites/:path*',
     '/failed-tasks/:path*',
     '/companies/:path*',
     '/health/:path*',

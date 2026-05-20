@@ -1,36 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { apiFetch } from '@/lib/api/client';
-import { endpoints } from '@/lib/api/endpoints';
-
-const POST_LOGIN_REDIRECT_KEY = 'simplex_post_login_redirect';
+import { useAuth } from '@/context/auth-context';
+import { ApiClientError } from '@/lib/api/client';
 
 export default function LoginPage(): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const { login, isLoading: authSessionLoading } = useAuth();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
     setError(null);
     try {
-      await apiFetch(endpoints.auth.login.path, {
-        method: 'POST',
-        body: { email, password },
-      });
-      const redirectTo = sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY);
-      if (redirectTo) {
-        sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
-        router.push(redirectTo);
-      } else {
-        router.push('/dashboard');
-      }
+      await login({ email, password });
     } catch (unknownError) {
+      if (unknownError instanceof ApiClientError && unknownError.code === 'ACCOUNT_DEACTIVATED') return;
       const message = unknownError instanceof Error ? unknownError.message : 'Login failed';
       setError(message);
     } finally {
@@ -64,8 +52,12 @@ export default function LoginPage(): JSX.Element {
           type="password"
           value={password}
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button className="w-full rounded bg-black px-3 py-2 text-white" disabled={submitting} type="submit">
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        <button
+          className="w-full rounded bg-black px-3 py-2 text-white"
+          disabled={submitting || authSessionLoading}
+          type="submit"
+        >
           {submitting ? 'Signing in...' : 'Sign in'}
         </button>
       </form>

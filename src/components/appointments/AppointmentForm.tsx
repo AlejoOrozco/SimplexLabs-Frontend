@@ -3,34 +3,24 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { AttendeeSearch } from '@/components/calendar/attendee-search';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { FormError } from '@/components/shared/FormError';
 import { ApiClientError } from '@/lib/api/client';
+import { deriveAppointmentTargetingFromAttendees } from '@/lib/appointments/derive-appointment-targeting-from-attendees';
 import {
+  appointmentFormSchema,
   createAppointmentSchema,
+  type AppointmentFormDto,
   type CreateAppointmentDto,
 } from '@/lib/schemas/appointment.schema';
-import { AppointmentStatus, AppointmentType } from '@/lib/types';
-import { appointmentTypeLabel } from '@/lib/utils/format';
-
-const TYPE_OPTIONS: readonly AppointmentType[] = [
-  AppointmentType.SIMPLEX_WITH_CLIENT,
-  AppointmentType.CLIENT_WITH_CONTACT,
-  AppointmentType.EXTERNAL,
-];
+import { AppointmentType, type AttendeeSearchResult } from '@/lib/types';
 
 interface AppointmentFormProps {
-  defaultValues?: Partial<CreateAppointmentDto>;
+  defaultValues?: Partial<AppointmentFormDto>;
   onSubmit: (values: CreateAppointmentDto) => Promise<void>;
   submitLabel?: string;
   onCancel?: () => void;
@@ -43,14 +33,13 @@ export function AppointmentForm({
   onCancel,
 }: AppointmentFormProps): JSX.Element {
   const [apiError, setApiError] = useState<string | null>(null);
+  const [selectedAttendees, setSelectedAttendees] = useState<AttendeeSearchResult[]>([]);
 
-  const form = useForm<CreateAppointmentDto>({
-    resolver: zodResolver(createAppointmentSchema),
+  const form = useForm<AppointmentFormDto>({
+    resolver: zodResolver(appointmentFormSchema),
     defaultValues: {
       title: '',
       description: null,
-      type: AppointmentType.CLIENT_WITH_CONTACT,
-      status: AppointmentStatus.PENDING,
       scheduledAt: new Date().toISOString(),
       durationMinutes: 30,
       contactId: null,
@@ -69,10 +58,26 @@ export function AppointmentForm({
     formState: { errors, isSubmitting },
   } = form;
 
-  const submit = async (values: CreateAppointmentDto): Promise<void> => {
+  const submit = async (values: AppointmentFormDto): Promise<void> => {
     setApiError(null);
+    const targeting = deriveAppointmentTargetingFromAttendees(selectedAttendees);
+    if (targeting.type === AppointmentType.CLIENT_WITH_CONTACT && !targeting.contactId) {
+      setApiError('Select a customer attendee so we know which contact this meeting is with');
+      return;
+    }
+    const dto: CreateAppointmentDto = {
+      ...values,
+      type: targeting.type,
+      contactId: targeting.contactId ?? values.contactId ?? null,
+      attendeeUserIds: selectedAttendees.length > 0 ? selectedAttendees.map((a) => a.id) : undefined,
+    };
+    const parsed = createAppointmentSchema.safeParse(dto);
+    if (!parsed.success) {
+      setApiError(parsed.error.flatten().formErrors.join(', ') || 'Invalid form');
+      return;
+    }
     try {
-      await onSubmit(values);
+      await onSubmit(parsed.data);
     } catch (error) {
       const message =
         error instanceof ApiClientError ? error.message : 'Could not save appointment';
@@ -88,28 +93,16 @@ export function AppointmentForm({
         <FormError message={errors.title?.message} />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="type">Type</Label>
-        <Controller
-          control={control}
-          name="type"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger id="type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TYPE_OPTIONS.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {appointmentTypeLabel(t)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        <FormError message={errors.type?.message} />
-      </div>
+      <AttendeeSearch
+        selectedAttendees={selectedAttendees}
+        onAdd={(attendee) => {
+          setSelectedAttendees((prev) => (prev.some((a) => a.id === attendee.id) ? prev : [...prev, attendee]));
+        }}
+        onRemove={(id) => setSelectedAttendees((prev) => prev.filter((a) => a.id !== id))}
+      />
+      <p className="text-xs text-text-secondary">
+        Meeting type (client ↔ contact, Simplex ↔ client, or external) is inferred from who you add.
+      </p>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
