@@ -1,7 +1,7 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
-import { SimplexLogo } from '@/components/branding/simplex-logo';
 import { useAuth } from '@/context/auth-context';
 import { ApiClientError } from '@/lib/api/client';
 
@@ -33,12 +33,16 @@ export default function LoginPage(): JSX.Element {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center p-6">
-      <div className="mb-8 flex justify-center">
-        <SimplexLogo size={80} priority />
+      <div className="mb-4 flex justify-center px-2">
+        <Image
+          src="/login-logo.png"
+          alt="Simplex Labs"
+          width={560}
+          height={112}
+          className="h-auto w-full object-contain"
+          priority
+        />
       </div>
-      <h1 className="font-display mb-6 text-center text-3xl font-semibold tracking-tight text-text-primary">
-        Sign in
-      </h1>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <label className="block text-sm text-text-secondary" htmlFor="email">
           Email
