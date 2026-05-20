@@ -1,13 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { Bell, User, UserCircle } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { SidebarAccountFloatingPanel } from '@/components/layout/sidebar-account-floating-panel';
-import { sidebarFooterControlClass } from '@/components/layout/sidebar-footer-nav-classes';
 import { SidebarNotificationsFloatingPanel } from '@/components/layout/sidebar-notifications-floating-panel';
+import { SidebarProfileAvatar } from '@/components/layout/sidebar-profile-avatar';
 import { getMe, logout as logoutRequest } from '@/lib/api/auth.api';
 import type { Notification } from '@/lib/api/endpoints';
 import {
@@ -20,7 +19,11 @@ import { clearAuthProfile } from '@/lib/auth/profile-cache';
 import { readSessionRoleFromMePayload } from '@/lib/auth/session-role-utils';
 import { useSidebarFooterProfile } from '@/lib/hooks/use-sidebar-footer-profile';
 import { getSidebarNotificationHref } from '@/lib/layout/sidebar-notification-href';
-import { clampSidebarPanelLeft, type SidebarPanelAnchor } from '@/lib/layout/sidebar-panel-anchor';
+import {
+  anchorSidebarPanelAboveTrigger,
+  clampSidebarPanelLeft,
+  type SidebarPanelAnchor,
+} from '@/lib/layout/sidebar-panel-anchor';
 import { notify } from '@/lib/toast';
 import { cn } from '@/lib/utils/cn';
 
@@ -40,7 +43,7 @@ export function SidebarSessionFooter({
   subscriptionPlan,
 }: SidebarSessionFooterProps): JSX.Element {
   const router = useRouter();
-  const pathname = usePathname();
+  const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const [accountAnchor, setAccountAnchor] = useState<SidebarPanelAnchor | null>(null);
   const [notificationAnchor, setNotificationAnchor] = useState<SidebarPanelAnchor | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -63,8 +66,7 @@ export function SidebarSessionFooter({
   const userRole = readSessionRoleFromMePayload(meQuery.data);
   const hasUnreadNotifications = unreadCount > 0;
   const profileHref = '/settings/company';
-  const isProfileActive = pathname === profileHref || pathname.startsWith(`${profileHref}/`);
-  const footerClass = (isActive: boolean): string => sidebarFooterControlClass(isCollapsed, isActive);
+  const planSubtitle = subscriptionPlan ?? resolvedCompanyName ?? 'Member';
 
   const refreshUnreadCount = useCallback(async (): Promise<void> => {
     try {
@@ -114,12 +116,7 @@ export function SidebarSessionFooter({
     void refreshNotifications();
   }, [notificationAnchor, refreshNotifications, unreadCount]);
 
-  const closePanels = useCallback((): void => {
-    setAccountAnchor(null);
-    setNotificationAnchor(null);
-  }, []);
-
-  const handleOpenNotifications = useCallback(
+  const openNotificationsPanel = useCallback(
     async (rect: DOMRect): Promise<void> => {
       setAccountAnchor(null);
       setNotificationAnchor((current) => {
@@ -131,10 +128,24 @@ export function SidebarSessionFooter({
     [refreshNotifications],
   );
 
-  const handleToggleAccount = useCallback((rect: DOMRect): void => {
-    setNotificationAnchor(null);
-    setAccountAnchor((current) => (current ? null : clampSidebarPanelLeft(rect, 280)));
-  }, []);
+  const handleToggleAccount = useCallback(
+    (rect: DOMRect): void => {
+      setNotificationAnchor(null);
+      setAccountAnchor((current) => {
+        if (current) return null;
+        if (isCollapsed) return clampSidebarPanelLeft(rect, 280);
+        return anchorSidebarPanelAboveTrigger(rect);
+      });
+    },
+    [isCollapsed],
+  );
+
+  const handleOpenNotificationsFromMenu = useCallback((): void => {
+    const trigger = profileTriggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    void openNotificationsPanel(rect);
+  }, [openNotificationsPanel]);
 
   const handleMarkAllRead = useCallback(async (): Promise<void> => {
     try {
@@ -180,71 +191,55 @@ export function SidebarSessionFooter({
 
   return (
     <>
-      <div className="mt-3 border-t border-border-default pt-3">
-        <p className={cn('mb-2 px-3 text-xs font-medium text-text-secondary', isCollapsed ? 'sr-only' : '')}>
-          Account
-        </p>
-        <div className="flex flex-col gap-1">
-          <button
-            type="button"
-            data-tour="sidebar-notifications"
-            title={isCollapsed ? 'Notifications' : undefined}
-            aria-expanded={Boolean(notificationAnchor)}
-            className={footerClass(Boolean(notificationAnchor))}
-            onClick={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect();
-              void handleOpenNotifications(rect);
-            }}
-          >
-            <span className="relative inline-flex shrink-0">
-              <Bell size={18} aria-hidden />
-              {hasUnreadNotifications ? (
-                <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-brand-500" aria-hidden />
-              ) : null}
+      <div className="shrink-0 border-t border-border-default pt-2">
+        <button
+          ref={profileTriggerRef}
+          type="button"
+          title={isCollapsed ? resolvedUserName : undefined}
+          aria-expanded={Boolean(accountAnchor)}
+          aria-haspopup="menu"
+          className={cn(
+            'group relative flex w-full items-center rounded-md border border-transparent transition-colors hover:border-border-default hover:bg-surface-overlay',
+            isCollapsed ? 'justify-center p-1.5' : 'gap-2.5 p-2',
+            accountAnchor ? 'border-border-default bg-surface-overlay' : '',
+          )}
+          onClick={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect();
+            handleToggleAccount(rect);
+          }}
+        >
+          <span className="relative shrink-0">
+            <SidebarProfileAvatar size={isCollapsed ? 26 : 30} />
+            {hasUnreadNotifications ? (
+              <span
+                className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-surface-base bg-brand"
+                aria-label="Unread notifications"
+              />
+            ) : null}
+          </span>
+
+          {!isCollapsed ? (
+            <>
+              <span className="min-w-0 flex-1 text-left">
+                <span className="block truncate font-medium leading-tight text-text-primary">
+                  {resolvedUserName}
+                </span>
+                <span className="block truncate text-[11px] leading-tight text-text-secondary">{planSubtitle}</span>
+              </span>
+              <MoreHorizontal
+                size={16}
+                className="shrink-0 text-text-secondary"
+                aria-hidden
+              />
+            </>
+          ) : null}
+
+          {isCollapsed ? (
+            <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-tooltip -translate-y-1/2 rounded-md border border-border-default bg-surface-overlay px-2 py-1 text-[11px] text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+              {resolvedUserName}
             </span>
-            {!isCollapsed ? <span>Notifications</span> : null}
-            {isCollapsed ? (
-              <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-tooltip -translate-y-1/2 rounded-md border border-border-default bg-surface-page px-2 py-1 text-xs text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
-                Notifications
-              </span>
-            ) : null}
-          </button>
-
-          <Link
-            href={profileHref}
-            title={isCollapsed ? 'Profile' : undefined}
-            aria-current={isProfileActive ? 'page' : undefined}
-            className={footerClass(isProfileActive)}
-            onClick={closePanels}
-          >
-            <UserCircle size={18} aria-hidden />
-            {!isCollapsed ? <span>Profile</span> : null}
-            {isCollapsed ? (
-              <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-tooltip -translate-y-1/2 rounded-md border border-border-default bg-surface-page px-2 py-1 text-xs text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
-                Profile
-              </span>
-            ) : null}
-          </Link>
-
-          <button
-            type="button"
-            title={isCollapsed ? 'Account' : undefined}
-            aria-expanded={Boolean(accountAnchor)}
-            className={footerClass(Boolean(accountAnchor))}
-            onClick={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect();
-              handleToggleAccount(rect);
-            }}
-          >
-            <User size={18} aria-hidden />
-            {!isCollapsed ? <span>Account</span> : null}
-            {isCollapsed ? (
-              <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-tooltip -translate-y-1/2 rounded-md border border-border-default bg-surface-page px-2 py-1 text-xs text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
-                Account
-              </span>
-            ) : null}
-          </button>
-        </div>
+          ) : null}
+        </button>
       </div>
 
       {accountAnchor ? (
@@ -255,8 +250,10 @@ export function SidebarSessionFooter({
           resolvedUserEmail={resolvedUserEmail}
           resolvedCompanyName={resolvedCompanyName}
           subscriptionPlan={subscriptionPlan}
+          hasUnreadNotifications={hasUnreadNotifications}
           isSigningOut={isSigningOut}
           onRequestClose={() => setAccountAnchor(null)}
+          onOpenNotifications={handleOpenNotificationsFromMenu}
           onLogout={() => void handleLogout()}
         />
       ) : null}

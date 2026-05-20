@@ -86,7 +86,7 @@ export function UserPermissionsPanel({ userId, userName }: UserPermissionsPanelP
       {entries.map(([groupName, permissions]) => (
         <div
           key={groupName}
-          className="overflow-hidden rounded-xl border border-border-default bg-surface-page"
+          className="overflow-hidden rounded-xl border border-border-default bg-surface-base"
         >
           <div className="flex items-center justify-between border-b border-border-default bg-surface-raised px-4 py-3">
             <span className="text-sm font-semibold text-text-primary">{groupName}</span>
@@ -105,7 +105,7 @@ export function UserPermissionsPanel({ userId, userName }: UserPermissionsPanelP
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-medium text-text-primary">{p.label}</span>
                       {p.isOverridden ? (
-                        <span className="rounded-full border border-warning bg-warning-light px-1.5 py-0.5 text-xs text-warning-dark">
+                        <span className="rounded-full border border-warning bg-warning-surface px-1.5 py-0.5 text-xs text-warning-dark">
                           Custom
                         </span>
                       ) : null}

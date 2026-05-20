@@ -1,88 +1,121 @@
 :root {
-  /* Brand */
-  --color-brand-50: #f5f3ff;
-  --color-brand-100: #ede9fe;
-  --color-brand-200: #ddd6fe;
-  --color-brand-300: #c4b5fd;
-  --color-brand-400: #a78bfa;
-  --color-brand-500: #8b5cf6;
-  --color-brand-600: #7c3aed;
-  --color-brand-700: #6d28d9;
-  --color-brand-800: #5b21b6;
-  --color-brand-900: #4c1d95;
+  /* ─── Brand anchor ──────────────────────────────── */
+  --color-brand: #7c6af7;
+  --color-brand-dark: #6355d4;
+  --color-brand-deep: #4a3fa8;
+  --color-brand-light: #ede9ff;
+  --color-brand-glow: rgba(124, 106, 247, 0.25);
 
-  /* Neutral */
-  --color-neutral-0: #ffffff;
-  --color-neutral-50: #fafafa;
-  --color-neutral-100: #f5f5f5;
-  --color-neutral-200: #e5e5e5;
-  --color-neutral-300: #d4d4d4;
-  --color-neutral-400: #a3a3a3;
-  --color-neutral-500: #737373;
-  --color-neutral-600: #525252;
-  --color-neutral-700: #404040;
-  --color-neutral-800: #262626;
-  --color-neutral-900: #171717;
-  --color-neutral-950: #0a0a0a;
+  /* ─── Pillar: AI Agents (purple) ────────────────── */
+  --color-agents: #9b8afb;
+  --color-agents-dark: #7c6af7;
+  --color-agents-light: #ede9ff;
+  --color-agents-glow: rgba(155, 138, 251, 0.25);
+  --color-agents-surface: rgba(155, 138, 251, 0.08);
 
-  /* Semantic */
-  --color-success-light: #f0fdf4;
-  --color-success: #22c55e;
-  --color-success-dark: #15803d;
+  /* ─── Pillar: Website (cerulean blue) ───────────── */
+  --color-website: #60a5fa;
+  --color-website-dark: #3b82f6;
+  --color-website-light: #eff6ff;
+  --color-website-glow: rgba(96, 165, 250, 0.25);
+  --color-website-surface: rgba(96, 165, 250, 0.08);
 
-  --color-warning-light: #fffbeb;
-  --color-warning: #f59e0b;
-  --color-warning-dark: #b45309;
+  /* ─── Pillar: Marketing (warm amber) ────────────── */
+  --color-marketing: #fb923c;
+  --color-marketing-dark: #f97316;
+  --color-marketing-light: #fff7ed;
+  --color-marketing-glow: rgba(251, 146, 60, 0.25);
+  --color-marketing-surface: rgba(251, 146, 60, 0.08);
 
-  --color-error-light: #fef2f2;
-  --color-error: #ef4444;
-  --color-error-dark: #b91c1c;
+  /* ─── Gradients ─────────────────────────────────── */
+  --gradient-brand: linear-gradient(135deg, #fb923c 0%, #7c6af7 50%, #60a5fa 100%);
+  --gradient-brand-subtle: linear-gradient(
+    135deg,
+    rgba(251, 146, 60, 0.15) 0%,
+    rgba(124, 106, 247, 0.15) 50%,
+    rgba(96, 165, 250, 0.15) 100%
+  );
+  --gradient-brand-vertical: linear-gradient(180deg, #7c6af7 0%, #60a5fa 100%);
+  --gradient-agents: linear-gradient(135deg, #7c6af7 0%, #9b8afb 100%);
+  --gradient-website: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  --gradient-marketing: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  --gradient-glow-top: radial-gradient(ellipse at 50% 0%, rgba(124, 106, 247, 0.2) 0%, transparent 70%);
+  --gradient-glow-bottom: radial-gradient(ellipse at 50% 100%, rgba(96, 165, 250, 0.15) 0%, transparent 70%);
 
-  --color-info-light: #eff6ff;
-  --color-info: #3b82f6;
-  --color-info-dark: #1d4ed8;
+  /* ─── Dark surfaces ─────────────────────────────── */
+  --surface-page: #0b0a13;
+  --surface-base: #111020;
+  --surface-raised: #171626;
+  --surface-overlay: #1e1c30;
+  --surface-sunken: #080710;
 
-  /* Surface */
-  --surface-page: var(--color-neutral-0);
-  --surface-raised: var(--color-neutral-50);
-  --surface-overlay: var(--color-neutral-100);
-  --surface-sunken: var(--color-neutral-100);
+  /* ─── Borders ───────────────────────────────────── */
+  --border-subtle: #1e1c30;
+  --border-default: #2a2840;
+  --border-strong: #3d3a5c;
+  --border-focus: #7c6af7;
+  --border-agents: rgba(155, 138, 251, 0.4);
+  --border-website: rgba(96, 165, 250, 0.4);
+  --border-marketing: rgba(251, 146, 60, 0.4);
 
-  /* Border */
-  --border-default: var(--color-neutral-200);
-  --border-strong: var(--color-neutral-300);
-  --border-focus: var(--color-brand-500);
+  /* ─── Text ───────────────────────────────────────── */
+  --text-primary: #f2f0ff;
+  --text-secondary: #8b89a8;
+  --text-tertiary: #5c5a75;
+  --text-disabled: #3d3a5c;
+  --text-inverse: #0b0a13;
+  --text-brand: #9b8afb;
+  --text-agents: #9b8afb;
+  --text-website: #60a5fa;
+  --text-marketing: #fb923c;
 
-  /* Text */
-  --text-primary: var(--color-neutral-900);
-  --text-secondary: var(--color-neutral-500);
-  --text-disabled: var(--color-neutral-300);
-  --text-inverse: var(--color-neutral-0);
-  --text-brand: var(--color-brand-600);
+  /* ─── Semantic colors ───────────────────────────── */
+  --color-success: #34d399;
+  --color-success-dark: #059669;
+  --color-success-surface: rgba(52, 211, 153, 0.1);
 
-  /* Typography */
-  --font-sans: "Geist", system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Fira Code", monospace;
+  --color-warning: #fbbf24;
+  --color-warning-dark: #d97706;
+  --color-warning-surface: rgba(251, 191, 36, 0.1);
 
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
+  --color-error: #f87171;
+  --color-error-dark: #dc2626;
+  --color-error-surface: rgba(248, 113, 113, 0.1);
+
+  --color-info: #60a5fa;
+  --color-info-dark: #3b82f6;
+  --color-info-surface: rgba(96, 165, 250, 0.1);
+
+  /* ─── Typography (font faces completed in globals / next/font) ─ */
+  --text-display-2xl: 4.5rem;
+  --text-display-xl: 3.75rem;
+  --text-display-lg: 3rem;
   --text-4xl: 2.25rem;
+  --text-3xl: 1.875rem;
+  --text-2xl: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-lg: 1.125rem;
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+  --text-2xs: 0.625rem;
 
-  --font-normal: 400;
+  --font-regular: 400;
   --font-medium: 500;
   --font-semibold: 600;
   --font-bold: 700;
 
-  --leading-tight: 1.25;
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
   --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
+  --leading-relaxed: 1.65;
 
-  /* Spacing */
+  --tracking-tight: -0.03em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+
+  /* ─── Spacing (8px base grid) ───────────────────── */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -93,31 +126,30 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
   --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
 
-  /* Radius */
+  /* ─── Border radius ─────────────────────────────── */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
   --radius-full: 9999px;
 
-  /* Shadow */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm:
-    0 1px 3px 0 rgb(0 0 0 / 0.1),
-    0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md:
-    0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl:
-    0 20px 25px -5px rgb(0 0 0 / 0.1),
-    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* ─── Shadows (for dark UI) ─────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-brand: 0 0 24px rgba(124, 106, 247, 0.3), 0 0 8px rgba(124, 106, 247, 0.2);
+  --shadow-agents: 0 0 20px rgba(155, 138, 251, 0.25);
+  --shadow-website: 0 0 20px rgba(96, 165, 250, 0.25);
+  --shadow-marketing: 0 0 20px rgba(251, 146, 60, 0.25);
 
-  /* Motion */
+  /* ─── Motion ────────────────────────────────────── */
   --duration-fast: 100ms;
   --duration-base: 200ms;
   --duration-slow: 300ms;
@@ -126,11 +158,12 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-  /* Layout */
+  /* ─── Layout ────────────────────────────────────── */
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 64px;
-  --dock-height: 68px;
+  --dock-height: 72px;
   --content-max-width: 1280px;
   --z-sidebar: 100;
   --z-dock: 100;
@@ -138,4 +171,56 @@
   --z-modal: 300;
   --z-toast: 400;
   --z-tooltip: 500;
+}
+
+/* ─── Global dark base ─────────────────────────── */
+html,
+body {
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Gradient text utility ─────────────────────── */
+.text-gradient-brand {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-agents {
+  background: var(--gradient-agents);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Glow card utility ─────────────────────────── */
+.card-glow-agents {
+  box-shadow: 0 0 0 1px var(--border-agents), var(--shadow-agents);
+}
+
+.card-glow-website {
+  box-shadow: 0 0 0 1px var(--border-website), var(--shadow-website);
+}
+
+.card-glow-marketing {
+  box-shadow: 0 0 0 1px var(--border-marketing), var(--shadow-marketing);
+}
+
+.card-glow-brand {
+  box-shadow: 0 0 0 1px var(--border-focus), var(--shadow-brand);
+}
+
+/* ─── Noise texture overlay (premium dark feel) ─── */
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
 }

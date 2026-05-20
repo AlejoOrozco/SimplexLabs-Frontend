@@ -26,7 +26,7 @@ export function ConversationList({
       header: 'Last message',
       cell: (row) =>
         row.lastMessage ? (
-          <span className="line-clamp-1 max-w-sm text-gray-700">{row.lastMessage.content}</span>
+          <span className="line-clamp-1 max-w-sm text-text-primary">{row.lastMessage.content}</span>
         ) : (
           '—'
         ),

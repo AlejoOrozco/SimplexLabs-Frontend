@@ -98,7 +98,7 @@ export function CompanyAgentStepSection({ state, plans, onUpdate }: CompanyAgent
                   key={ch}
                   className={cn(
                     'flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm',
-                    checked ? 'border-brand-500 bg-brand-50' : 'border-border-default',
+                    checked ? 'border-border-focus bg-surface-raised shadow-brand' : 'border-border-default',
                   )}
                 >
                   <input
@@ -126,7 +126,7 @@ export function CompanyAgentStepSection({ state, plans, onUpdate }: CompanyAgent
                 key={m}
                 className={cn(
                   'flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm',
-                  checked ? 'border-brand-500 bg-brand-50' : 'border-border-default',
+                  checked ? 'border-border-focus bg-surface-raised shadow-brand' : 'border-border-default',
                 )}
               >
                 <input

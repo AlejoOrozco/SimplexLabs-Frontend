@@ -1,9 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useCompanies } from '@/lib/hooks/use-companies';
 import { useSubscriptions } from '@/lib/hooks/use-subscriptions';
+import { useCompanies } from '@/lib/hooks/use-companies';
+import { pickPrimaryCompanyAdmin } from '@/lib/admin/pick-primary-company-admin';
+import { adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
 import { SubStatus } from '@/lib/types';
+import { fullName } from '@/lib/utils/format';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export function AdminCompaniesDirectory(): JSX.Element {
@@ -15,7 +18,7 @@ export function AdminCompaniesDirectory(): JSX.Element {
   }
 
   return (
-    <div className="rounded-lg border border-border-default bg-surface-page">
+    <div className="rounded-lg border border-border-default bg-surface-base">
       <Table>
         <TableHeader>
           <TableRow>
@@ -27,12 +30,24 @@ export function AdminCompaniesDirectory(): JSX.Element {
         <TableBody>
           {companies.map((c) => {
             const activeCount = subscriptions.filter((s) => s.companyId === c.id && s.status === SubStatus.ACTIVE).length;
+            const primaryAdmin = pickPrimaryCompanyAdmin(c);
             return (
               <TableRow key={c.id}>
-                <TableCell className="font-medium">
-                  <Link href={`/admin/clients/${c.id}`} className="text-text-brand hover:underline">
-                    {c.name}
-                  </Link>
+                <TableCell>
+                  <div className="font-medium">
+                    <Link href={adminCompanyWorkspaceHref(c.id)} className="text-text-brand hover:underline">
+                      {c.name}
+                    </Link>
+                  </div>
+                  <p className="mt-1 text-xs text-text-secondary">
+                    {primaryAdmin ? (
+                      <>
+                        Admin: {fullName(primaryAdmin)} · {primaryAdmin.email}
+                      </>
+                    ) : (
+                      <>Admin: —</>
+                    )}
+                  </p>
                 </TableCell>
                 <TableCell>{c.niche}</TableCell>
                 <TableCell>{activeCount}</TableCell>

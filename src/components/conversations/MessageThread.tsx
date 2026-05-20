@@ -27,18 +27,13 @@ export function MessageThread({ messages }: MessageThreadProps): JSX.Element {
             <div
               className={cn(
                 'max-w-md rounded-lg border px-3 py-2 text-sm',
-                isAgent ? 'bg-gray-900 text-white' : 'bg-white',
+                isAgent
+                  ? 'border-border-focus bg-brand text-text-inverse shadow-brand'
+                  : 'border-border-default bg-surface-raised text-text-primary',
               )}
             >
               <p className="whitespace-pre-wrap">{m.content}</p>
-              <p
-                className={cn(
-                  'mt-1 text-xs',
-                  isAgent ? 'text-gray-300' : 'text-gray-500',
-                )}
-              >
-                {formatDateTime(m.sentAt)}
-              </p>
+              <p className={cn('mt-1 text-xs text-text-tertiary')}>{formatDateTime(m.sentAt)}</p>
             </div>
           </li>
         );

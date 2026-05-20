@@ -1,21 +1,31 @@
 import { apiDelete, apiGet, apiPost, apiPut } from '@/lib/api/client';
 import type { CreateUserDto, UpdateUserDto } from '@/lib/schemas/user.schema';
 import type { User } from '@/lib/types';
+import { normalizeUser, normalizeUsers } from '@/lib/users/normalize-user';
 
 export async function getUsers(): Promise<User[]> {
-  return apiGet<User[]>('/users');
+  const raw = await apiGet<unknown>('/users');
+  return normalizeUsers(raw);
+}
+
+export async function getUsersForCompany(companyId: string): Promise<User[]> {
+  const raw = await apiGet<unknown>('/users', { params: { companyId } });
+  return normalizeUsers(raw);
 }
 
 export async function getUser(id: string): Promise<User> {
-  return apiGet<User>(`/users/${id}`);
+  const raw = await apiGet<unknown>(`/users/${id}`);
+  return normalizeUser(raw);
 }
 
 export async function createUser(dto: CreateUserDto): Promise<User> {
-  return apiPost<User, CreateUserDto>('/users', dto);
+  const raw = await apiPost<unknown, CreateUserDto>('/users', dto);
+  return normalizeUser(raw);
 }
 
 export async function updateUser(id: string, dto: UpdateUserDto): Promise<User> {
-  return apiPut<User, UpdateUserDto>(`/users/${id}`, dto);
+  const raw = await apiPut<unknown, UpdateUserDto>(`/users/${id}`, dto);
+  return normalizeUser(raw);
 }
 
 export async function deleteUser(id: string): Promise<void> {

@@ -24,14 +24,14 @@ export function Switch({ id, checked, onCheckedChange, disabled, className }: Sw
       }}
       className={cn(
         'relative inline-flex h-6 w-11 shrink-0 rounded-full border border-border-default transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-        checked ? 'bg-text-primary' : 'bg-surface-overlay',
+        checked ? 'bg-brand border-border-focus' : 'bg-surface-sunken',
         className,
       )}
     >
       <span
         className={cn(
-          'pointer-events-none inline-block h-5 w-5 translate-x-0.5 rounded-full bg-surface-page shadow-sm ring-0 transition-transform',
-          checked && 'translate-x-[1.375rem]',
+          'pointer-events-none inline-block h-5 w-5 translate-x-0.5 rounded-full shadow-sm ring-0 transition-transform',
+          checked ? 'translate-x-[1.375rem] bg-text-inverse' : 'bg-text-primary',
         )}
         aria-hidden
       />

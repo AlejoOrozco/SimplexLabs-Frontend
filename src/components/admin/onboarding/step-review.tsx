@@ -101,7 +101,7 @@ export function StepReview({ state }: OnboardingStepProps): JSX.Element {
         disabled={completeOnboarding.isPending}
         onClick={() => void handleConfirm()}
       >
-        {completeOnboarding.isPending ? 'Creating…' : 'Create client account'}
+        {completeOnboarding.isPending ? 'Creating…' : 'Create company account'}
       </Button>
 
       <p className="text-center text-xs text-text-secondary">

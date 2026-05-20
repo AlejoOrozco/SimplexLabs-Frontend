@@ -18,7 +18,7 @@ export function parseSessionRoleName(value: unknown): SessionRoleName | null {
   return trimmed as SessionRoleName;
 }
 
-/** Company-tenant users shown in admin client workspace (excludes platform operators). */
+/** Company-tenant users shown in the admin company workspace (excludes platform operators). */
 export function isTenantTeamRole(role: SessionRoleName): boolean {
   return role === 'CLIENT' || role === 'COMPANY_ADMIN' || role === 'COMPANY_STAFF';
 }
@@ -34,8 +34,8 @@ export function isPlatformOperatorRole(role: SessionRoleName | null | undefined)
 }
 
 /** Default SPA home after login when no `post_login_redirect` override is set. */
-export function getDefaultAuthenticatedHomePath(roleName: SessionRoleName): string {
-  return isPlatformOperatorRole(roleName) ? '/admin' : '/dashboard';
+export function getDefaultAuthenticatedHomePath(): string {
+  return '/dashboard';
 }
 
 /**

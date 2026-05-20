@@ -180,7 +180,7 @@ export function CalendarView({ companyId }: CalendarViewProps): JSX.Element {
     detailAppointment.organizerId === user?.id;
 
   return (
-    <div className="calendar-wrapper min-h-0 flex-1">
+    <div className="calendar-wrapper flex min-h-0 flex-1 flex-col gap-4">
       <CalendarToolbar
         calendarRef={calendarRef}
         isAdmin={isAdmin}
@@ -195,15 +195,16 @@ export function CalendarView({ companyId }: CalendarViewProps): JSX.Element {
       <CalendarLegend />
 
       {eventsQuery.isError ? (
-        <div className="mb-3 rounded-lg border border-error bg-error-light p-3 text-sm text-error-dark">
+        <div className="rounded-lg border border-error bg-error-surface p-3 text-sm text-error-dark">
           Could not load calendar events. Ensure the calendar API is available.
         </div>
       ) : null}
 
-      <FullCalendar
+      <div className="calendar-grid-card">
+        <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-        initialView="timeGridWeek"
+        initialView="dayGridMonth"
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
@@ -233,6 +234,7 @@ export function CalendarView({ companyId }: CalendarViewProps): JSX.Element {
         height="calc(100vh - 280px)"
         eventMaxStack={3}
       />
+      </div>
 
       <AppointmentModal
         open={createModal.open}

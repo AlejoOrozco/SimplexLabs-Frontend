@@ -83,7 +83,7 @@ export function MoveConfirmModal({
         if (!next) handleCancel();
       }}
     >
-      <DialogContent className="max-w-md border-border-default bg-surface-page text-text-primary">
+      <DialogContent className="max-w-md border-border-default bg-surface-overlay text-text-primary">
         <DialogHeader>
           <DialogTitle>Reschedule appointment?</DialogTitle>
         </DialogHeader>

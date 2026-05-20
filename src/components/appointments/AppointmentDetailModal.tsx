@@ -40,7 +40,7 @@ export function AppointmentDetailModal({
 }: AppointmentDetailModalProps): JSX.Element {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-border-default bg-surface-page text-text-primary">
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-border-default bg-surface-overlay text-text-primary">
         {isLoading ? (
           <>
             <DialogHeader>

@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { DollarSign, MessageCircle, ShoppingCart, CalendarDays } from 'lucide-react';
+import { AdminPlatformDashboard } from '@/components/admin/admin-platform-dashboard';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -45,20 +45,27 @@ function isCurrentMonth(dateValue: string): boolean {
   return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
 }
 
+function DashboardLoadingSkeleton(): JSX.Element {
+  return (
+    <section className="space-y-6">
+      <div className="space-y-2">
+        <SkeletonCard />
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <SkeletonStat key={index} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function DashboardPage(): JSX.Element {
-  const router = useRouter();
   const [showAllSet, setShowAllSet] = useState(false);
   const cachedProfile = readAuthProfile();
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) return;
-    if (isPlatformOperatorRole(user.roleName)) {
-      router.replace('/admin');
-    }
-  }, [authLoading, user, router]);
-
+  const isPlatformOperator = Boolean(user && isPlatformOperatorRole(user.roleName));
   const tenantSession = Boolean(user && !isPlatformOperatorRole(user.roleName));
 
   const clientStatsQuery = useQuery({
@@ -69,17 +76,27 @@ export default function DashboardPage(): JSX.Element {
     retry: 1,
   });
 
-  const ordersQuery = useQuery({ queryKey: ['orders'], queryFn: getOrders });
-  const appointmentsQuery = useQuery({ queryKey: ['appointments'], queryFn: getAppointments });
+  const ordersQuery = useQuery({
+    queryKey: ['orders'],
+    queryFn: getOrders,
+    enabled: tenantSession,
+  });
+  const appointmentsQuery = useQuery({
+    queryKey: ['appointments'],
+    queryFn: getAppointments,
+    enabled: tenantSession,
+  });
   const conversationsQuery = useQuery({
     queryKey: ['conversations'],
     queryFn: () => getConversations(),
+    enabled: tenantSession,
   });
-  const usersQuery = useQuery({ queryKey: ['users'], queryFn: getUsers });
-  const productsQuery = useQuery({ queryKey: ['products'], queryFn: getProducts });
+  const usersQuery = useQuery({ queryKey: ['users'], queryFn: getUsers, enabled: tenantSession });
+  const productsQuery = useQuery({ queryKey: ['products'], queryFn: getProducts, enabled: tenantSession });
   const paymentsQuery = useQuery({
     queryKey: ['payments'],
     queryFn: () => apiGet<Payment[]>('/payments'),
+    enabled: tenantSession,
   });
 
   const isLoading =
@@ -192,39 +209,21 @@ export default function DashboardPage(): JSX.Element {
   const firstName = user?.firstName ?? cachedProfile?.firstName ?? 'User';
   const hideChecklistForever = typeof window !== 'undefined' && localStorage.getItem(CHECKLIST_DONE_KEY) === '1';
 
-  if (authLoading || !user || isPlatformOperatorRole(user.roleName)) {
-    return (
-      <section className="space-y-6">
-        <div className="space-y-2">
-          <SkeletonCard />
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <SkeletonStat key={index} />
-          ))}
-        </div>
-      </section>
-    );
+  if (authLoading || !user) {
+    return <DashboardLoadingSkeleton />;
+  }
+
+  if (isPlatformOperator) {
+    return <AdminPlatformDashboard />;
   }
 
   if (isLoading) {
-    return (
-      <section className="space-y-6">
-        <div className="space-y-2">
-          <SkeletonCard />
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <SkeletonStat key={index} />
-          ))}
-        </div>
-      </section>
-    );
+    return <DashboardLoadingSkeleton />;
   }
 
   if (isError || !data) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4">
+      <div className="rounded-lg border border-error bg-error-surface p-4">
         <p className="font-medium text-error-dark">Could not load dashboard metrics.</p>
       </div>
     );
@@ -233,7 +232,7 @@ export default function DashboardPage(): JSX.Element {
   return (
     <section className="space-y-6">
       <header>
-        <h2 className="text-2xl font-semibold text-text-primary">
+        <h2 className="font-display text-3xl font-semibold tracking-tight text-text-primary">
           {greeting}, {firstName} <span aria-hidden>👋</span>
         </h2>
         <p className="mt-1 text-sm text-text-secondary">
@@ -245,38 +244,46 @@ export default function DashboardPage(): JSX.Element {
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-xl border border-border-default bg-surface-base p-4 card-glow-marketing">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
-            <DollarSign className="h-4 w-4" /> Revenue
+            <DollarSign className="h-4 w-4 text-marketing" /> Revenue
           </div>
-          <p className="mt-3 text-3xl font-semibold">{formatCurrency(data.revenueThisMonth)}</p>
+          <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-text-primary">
+            {formatCurrency(data.revenueThisMonth)}
+          </p>
           <p className="mt-1 text-xs text-text-secondary">This month</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-xl border border-border-default bg-surface-base p-4 card-glow-brand">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
-            <ShoppingCart className="h-4 w-4" /> Orders
+            <ShoppingCart className="h-4 w-4 text-brand" /> Orders
           </div>
-          <p className="mt-3 text-3xl font-semibold">{data.pendingOrders}</p>
+          <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-text-primary">
+            {data.pendingOrders}
+          </p>
           <p className="mt-1 text-xs text-text-secondary">Pending + confirmed</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-xl border border-border-default bg-surface-base p-4 card-glow-website">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
-            <CalendarDays className="h-4 w-4" /> Appointments today
+            <CalendarDays className="h-4 w-4 text-website" /> Appointments today
           </div>
-          <p className="mt-3 text-3xl font-semibold">{data.appointmentsToday}</p>
+          <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-text-primary">
+            {data.appointmentsToday}
+          </p>
           <p className="mt-1 text-xs text-text-secondary">Scheduled for today</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-xl border border-border-default bg-surface-base p-4 card-glow-agents">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
-            <MessageCircle className="h-4 w-4" /> Open chats
+            <MessageCircle className="h-4 w-4 text-agents" /> Open chats
           </div>
-          <p className="mt-3 text-3xl font-semibold">{data.openConversations}</p>
+          <p className="mt-3 font-mono text-3xl font-semibold tabular-nums tracking-tight text-text-primary">
+            {data.openConversations}
+          </p>
           <p className="mt-1 text-xs text-text-secondary">Not closed yet</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <h3 className="text-sm font-semibold">Recent conversations</h3>
           <p className="mb-3 text-xs text-text-secondary">Last 5</p>
           {data.recentConversations.length === 0 ? (
@@ -292,7 +299,7 @@ export default function DashboardPage(): JSX.Element {
             </ul>
           )}
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <h3 className="text-sm font-semibold">Upcoming appointments</h3>
           <p className="mb-3 text-xs text-text-secondary">Next 5</p>
           {data.upcomingAppointments.length === 0 ? (
@@ -311,7 +318,7 @@ export default function DashboardPage(): JSX.Element {
       </div>
 
       {data.hasNoConversations && !hideChecklistForever && !data.allChecklistDone ? (
-        <section className="rounded-lg border border-border-default bg-surface-page p-4">
+        <section className="rounded-lg border border-border-default bg-surface-base p-4">
           <h3 className="text-sm font-semibold">Getting started checklist</h3>
           <ul className="mt-3 space-y-2">
             {data.checklistItems.map((item) => (
@@ -332,7 +339,7 @@ export default function DashboardPage(): JSX.Element {
       ) : null}
 
       {showAllSet ? (
-        <section className="rounded-lg border border-success bg-success-light p-4 text-success-dark">
+        <section className="rounded-lg border border-success bg-success-surface p-4 text-success-dark">
           You&apos;re all set!
         </section>
       ) : null}

@@ -16,16 +16,16 @@ export function ContactDetail({ contact }: ContactDetailProps): JSX.Element {
       </CardHeader>
       <CardContent className="space-y-1 text-sm">
         <p>
-          <span className="text-gray-600">Email:</span> {contact.email ?? '—'}
+          <span className="text-text-secondary">Email:</span> {contact.email ?? '—'}
         </p>
         <p>
-          <span className="text-gray-600">Phone:</span> {contact.phone ?? '—'}
+          <span className="text-text-secondary">Phone:</span> {contact.phone ?? '—'}
         </p>
         <p>
-          <span className="text-gray-600">Source:</span> {contactSourceLabel(contact.source)}
+          <span className="text-text-secondary">Source:</span> {contactSourceLabel(contact.source)}
         </p>
         <p>
-          <span className="text-gray-600">Created:</span> {formatDate(contact.createdAt)}
+          <span className="text-text-secondary">Created:</span> {formatDate(contact.createdAt)}
         </p>
       </CardContent>
     </Card>

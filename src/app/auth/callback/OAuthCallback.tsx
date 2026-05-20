@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useAuth } from '@/context/auth-context';
 import * as authApi from '@/lib/api/auth.api';
+import { armAuthFailureSuppression } from '@/lib/auth/auth-failure-suppression';
 import { POST_LOGIN_REDIRECT_KEY } from '@/lib/auth/post-login-redirect';
 import { getDefaultAuthenticatedHomePath } from '@/lib/auth/session-role-utils';
 import { writeAuthProfile } from '@/lib/auth/profile-cache';
@@ -34,18 +35,17 @@ export function OAuthCallback(): JSX.Element {
     void (async () => {
       try {
         bumpSessionHydrationGeneration();
+        armAuthFailureSuppression();
         const user = await authApi.handleOAuthCallback(accessToken);
         setUser(user);
         writeAuthProfile(user);
         const redirectTo = sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY);
         if (redirectTo) {
           sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
-          router.replace(redirectTo);
-          router.refresh();
+          window.location.assign(redirectTo);
           return;
         }
-        router.replace(getDefaultAuthenticatedHomePath(user.roleName));
-        router.refresh();
+        window.location.assign(getDefaultAuthenticatedHomePath());
       } catch (err) {
         setError(err instanceof Error ? err.message : 'OAuth failed');
         router.replace('/login?error=oauth_failed');

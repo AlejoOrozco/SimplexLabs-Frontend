@@ -11,6 +11,14 @@ export function useUsers() {
   });
 }
 
+export function useUsersByCompany(companyId: string | undefined) {
+  return useQuery<User[]>({
+    queryKey: queryKeys.users.listByCompany(companyId ?? ''),
+    queryFn: () => api.getUsersForCompany(companyId as string),
+    enabled: Boolean(companyId),
+  });
+}
+
 export function useUser(id: string | undefined) {
   return useQuery<User>({
     queryKey: queryKeys.users.detail(id ?? ''),
@@ -24,7 +32,8 @@ export function useCreateUser() {
   return useMutation<User, Error, CreateUserDto>({
     mutationFn: api.createUser,
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.users.list() });
+      void qc.invalidateQueries({ queryKey: queryKeys.users.all });
+      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
     },
   });
 }
@@ -34,8 +43,8 @@ export function useUpdateUser(id: string) {
   return useMutation<User, Error, UpdateUserDto>({
     mutationFn: (dto) => api.updateUser(id, dto),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.users.list() });
-      void qc.invalidateQueries({ queryKey: queryKeys.users.detail(id) });
+      void qc.invalidateQueries({ queryKey: queryKeys.users.all });
+      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
     },
   });
 }
@@ -45,7 +54,8 @@ export function useDeleteUser() {
   return useMutation<void, Error, string>({
     mutationFn: api.deleteUser,
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.users.list() });
+      void qc.invalidateQueries({ queryKey: queryKeys.users.all });
+      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
     },
   });
 }

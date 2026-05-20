@@ -27,8 +27,8 @@ export function StepIndicator({ steps, currentStep, onStepClick }: StepIndicator
             className={cn(
               'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
               isCurrent
-                ? 'border-brand-500 bg-brand-50 text-text-brand'
-                : 'border-border-default bg-surface-page text-text-secondary hover:bg-neutral-50',
+                ? 'border-border-focus bg-surface-raised text-text-brand shadow-brand'
+                : 'border-border-default bg-surface-base text-text-secondary hover:bg-surface-raised',
             )}
           >
             <span className="tabular-nums">{s.number}</span>

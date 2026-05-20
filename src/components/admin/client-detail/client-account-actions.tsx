@@ -24,7 +24,7 @@ export function ClientAccountActions({ user }: ClientAccountActionsProps): JSX.E
   return (
     <div className="mt-2 space-y-2 text-sm">
       <p className="text-text-secondary">
-        Primary client user:{' '}
+        Primary company contact:{' '}
         <span className="font-medium text-text-primary">
           {user.firstName} {user.lastName}
         </span>{' '}

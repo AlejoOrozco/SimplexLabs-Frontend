@@ -14,9 +14,11 @@ import { loginSchema, type LoginDto } from '@/lib/schemas/auth.schema';
 import { notify } from '@/lib/toast';
 
 export function LoginForm(): JSX.Element {
-  const { login, isLoading: authSessionLoading } = useAuth();
+  const { login } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
   const [isOauthLoading, setIsOauthLoading] = useState<boolean>(false);
+  /** After a successful password sign-in, keep the UI locked until full navigation. */
+  const [passwordSignInLocksUi, setPasswordSignInLocksUi] = useState(false);
 
   const form = useForm<LoginDto>({
     resolver: zodResolver(loginSchema),
@@ -27,12 +29,14 @@ export function LoginForm(): JSX.Element {
 
   const onSubmit = async (values: LoginDto): Promise<void> => {
     setApiError(null);
+    setPasswordSignInLocksUi(true);
     const loadingId = notify.loading('Signing in...');
     try {
       await login(values);
       notify.dismiss(loadingId);
       notify.success('Welcome back');
     } catch (error) {
+      setPasswordSignInLocksUi(false);
       notify.dismiss(loadingId);
       if (error instanceof ApiClientError && error.code === 'ACCOUNT_DEACTIVATED') return;
       const message =
@@ -95,8 +99,8 @@ export function LoginForm(): JSX.Element {
 
       <FormError message={apiError} />
 
-      <Button type="submit" disabled={isSubmitting || authSessionLoading} className="w-full">
-        {isSubmitting ? 'Signing in…' : 'Sign in'}
+      <Button type="submit" disabled={isSubmitting || passwordSignInLocksUi} className="w-full">
+        {isSubmitting || passwordSignInLocksUi ? 'Signing in…' : 'Sign in'}
       </Button>
 
       <Button

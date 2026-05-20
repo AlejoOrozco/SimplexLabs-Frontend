@@ -62,7 +62,7 @@ export function AdminScheduleSimplexDialog({
         externalAttendeeEmail: null,
       });
       notify.success('Appointment scheduled', {
-        description: 'The client will see it as pending until they respond.',
+        description: 'The company will see it as pending until they respond.',
       });
       resetForm();
       onOpenChange(false);
@@ -80,11 +80,11 @@ export function AdminScheduleSimplexDialog({
         if (!next) resetForm();
       }}
     >
-      <DialogContent className="border-border-default bg-surface-page text-text-primary sm:max-w-md">
+      <DialogContent className="border-border-default bg-surface-overlay text-text-primary sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Schedule SimplexLabs meeting</DialogTitle>
           <DialogDescription className="text-text-secondary">
-            Creates a Simplex ↔ client appointment for this company. The client sees it as pending.
+            Creates a SimplexLabs ↔ company meeting for this tenant. The company sees it as pending.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">

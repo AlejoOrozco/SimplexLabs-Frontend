@@ -2,15 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { PageMeta } from '@/components/layout/page-meta';
 import { Button } from '@/components/ui/button';
 import { EditCompanyModal } from '@/components/companies/EditCompanyModal';
 import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
+import { adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
 import { useCompany } from '@/lib/hooks/use-companies';
 import {
-  CLIENT_DETAIL_TABS,
-  parseClientDetailTab,
-  type ClientDetailTabId,
+  COMPANY_WORKSPACE_TABS,
+  parseCompanyWorkspaceTab,
+  type CompanyWorkspaceTabId,
 } from '@/components/admin/client-detail/client-detail-tabs';
 import { OverviewTab } from '@/components/admin/client-detail/tabs/overview-tab';
 import { ConversationsTab } from '@/components/admin/client-detail/tabs/conversations-tab';
@@ -18,26 +20,27 @@ import { OrdersPaymentsTab } from '@/components/admin/client-detail/tabs/orders-
 import { AgentPerformanceTab } from '@/components/admin/client-detail/tabs/agent-performance-tab';
 import { AppointmentsTab } from '@/components/admin/client-detail/tabs/appointments-tab';
 import { WebsitesTab } from '@/components/admin/client-detail/tabs/websites-tab';
+import { CompanyTeamTab } from '@/components/admin/client-detail/tabs/company-team-tab';
 import { SettingsTab } from '@/components/admin/client-detail/tabs/settings-tab';
 
-interface AdminClientDetailShellProps {
+interface AdminCompanyWorkspaceShellProps {
   companyId: string;
 }
 
-export function AdminClientDetailShell({ companyId }: AdminClientDetailShellProps): JSX.Element {
+export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceShellProps): JSX.Element {
   const searchParams = useSearchParams();
-  const tab = parseClientDetailTab(searchParams.get('tab'));
+  const tab = parseCompanyWorkspaceTab(searchParams.get('tab'));
   const companyQuery = useCompany(companyId);
   const [editCompanyOpen, setEditCompanyOpen] = useState(false);
 
   if (companyQuery.isLoading) {
-    return <p className="text-sm text-text-secondary">Loading client…</p>;
+    return <p className="text-sm text-text-secondary">Loading company…</p>;
   }
   if (companyQuery.isError || !companyQuery.data) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4">
-        <p className="font-medium text-error-dark">Client not found or inaccessible.</p>
-        <Link href="/admin" className="mt-2 inline-block text-sm text-text-brand underline">
+      <div className="rounded-lg border border-error bg-error-surface p-4">
+        <p className="font-medium text-error-dark">Company not found or inaccessible.</p>
+        <Link href="/dashboard" className="mt-2 inline-block text-sm text-text-brand underline">
           Back to platform overview
         </Link>
       </div>
@@ -48,33 +51,20 @@ export function AdminClientDetailShell({ companyId }: AdminClientDetailShellProp
 
   return (
     <div className="space-y-6">
-      <nav className="text-sm text-text-secondary">
-        <Link href="/admin" className="text-text-brand hover:underline">
-          Platform
-        </Link>
-        <span aria-hidden className="mx-2">
-          /
-        </span>
-        <span className="text-text-primary">{company.name}</span>
-      </nav>
-
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-text-primary">{company.name}</h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Deep tenant view: most tabs are read-only; use Settings to edit company data and account status on behalf of
-            the client.
-          </p>
-        </div>
+      <PageMeta
+        title={company.name}
+        description="Deep tenant view: most tabs are read-only; use Settings to edit company data and account status on behalf of the company."
+      />
+      <div className="flex flex-wrap items-center justify-end gap-4">
         <Button type="button" variant="outline" size="sm" onClick={() => setEditCompanyOpen(true)}>
           Edit
         </Button>
-      </header>
+      </div>
 
       <div className="flex flex-wrap gap-2 border-b border-border-default pb-2">
-        {CLIENT_DETAIL_TABS.map((t) => {
+        {COMPANY_WORKSPACE_TABS.map((t) => {
           const active = t.id === tab;
-          const href = `/admin/clients/${companyId}?tab=${t.id}`;
+          const href = adminCompanyWorkspaceHref(companyId, t.id);
           return (
             <Link
               key={t.id}
@@ -83,8 +73,8 @@ export function AdminClientDetailShell({ companyId }: AdminClientDetailShellProp
               className={cn(
                 'rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-brand-50 text-text-brand'
-                  : 'text-text-secondary hover:bg-neutral-100 hover:text-text-primary',
+                  ? 'bg-surface-raised text-text-brand shadow-brand'
+                  : 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary',
               )}
             >
               {t.label}
@@ -102,7 +92,7 @@ export function AdminClientDetailShell({ companyId }: AdminClientDetailShellProp
   );
 }
 
-function TabPanel({ tab, companyId }: { tab: ClientDetailTabId; companyId: string }): JSX.Element {
+function TabPanel({ tab, companyId }: { tab: CompanyWorkspaceTabId; companyId: string }): JSX.Element {
   switch (tab) {
     case 'overview':
       return <OverviewTab companyId={companyId} />;
@@ -116,6 +106,8 @@ function TabPanel({ tab, companyId }: { tab: ClientDetailTabId; companyId: strin
       return <AppointmentsTab companyId={companyId} />;
     case 'websites':
       return <WebsitesTab companyId={companyId} />;
+    case 'team':
+      return <CompanyTeamTab companyId={companyId} />;
     case 'settings':
       return <SettingsTab companyId={companyId} />;
   }

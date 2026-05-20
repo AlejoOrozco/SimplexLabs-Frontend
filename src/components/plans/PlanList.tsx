@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/shared/DataTable';
-import type { Plan } from '@/lib/types';
+import { PlanFeatureType, type Plan } from '@/lib/types';
 import {
   channelLabel,
   formatCurrency,
@@ -13,6 +13,12 @@ import {
 interface PlanListProps {
   plans: readonly Plan[];
   onRowClick?: (plan: Plan) => void;
+}
+
+function planFeatureBadgeVariant(feature: PlanFeatureType): 'agents' | 'website' | 'marketing' {
+  if (feature === PlanFeatureType.AGENTS) return 'agents';
+  if (feature === PlanFeatureType.WEBSITE) return 'website';
+  return 'marketing';
 }
 
 export function PlanList({ plans, onRowClick }: PlanListProps): JSX.Element {
@@ -34,7 +40,7 @@ export function PlanList({ plans, onRowClick }: PlanListProps): JSX.Element {
       cell: (row) => (
         <div className="flex flex-wrap gap-1">
           {row.features.map((f) => (
-            <Badge key={f.id} variant="info">
+            <Badge key={f.id} variant={planFeatureBadgeVariant(f.feature)}>
               {planFeatureLabel(f.feature)}
             </Badge>
           ))}

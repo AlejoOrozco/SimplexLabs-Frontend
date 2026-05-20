@@ -8,7 +8,7 @@ import type { Company, Subscription } from '@/lib/types';
 import { SubStatus } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 
-const RETURN_TO = encodeURIComponent('/admin/onboarding?step=2&mode=staff');
+const RETURN_TO = encodeURIComponent('/admin/onboarding');
 
 interface UserStaffCompanyStepProps {
   companies: readonly Company[];
@@ -50,13 +50,13 @@ export function UserStaffCompanyStep({
       </OnboardingFormField>
 
       {selected ? (
-        <div className="rounded-lg border border-brand-500 bg-brand-50 p-4 text-sm">
+        <div className="rounded-lg border border-border-focus bg-surface-raised p-4 text-sm shadow-brand">
           <p className="font-medium text-text-primary">Selected</p>
           <p className="mt-1 text-text-secondary">{selected.name}</p>
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-border-default bg-surface-page">
+      <div className="rounded-lg border border-border-default bg-surface-base">
         <ul className="max-h-72 divide-y divide-border-default overflow-y-auto">
           {matches.length === 0 ? (
             <li className="px-3 py-4 text-sm text-text-secondary">No companies match this search.</li>
@@ -70,7 +70,7 @@ export function UserStaffCompanyStep({
                     onClick={() => onSelectCompany(c)}
                     className={cn(
                       'flex w-full flex-col gap-0.5 px-3 py-3 text-left text-sm transition-colors hover:bg-surface-raised sm:flex-row sm:items-center sm:justify-between',
-                      selectedCompanyId === c.id && 'bg-brand-50',
+                      selectedCompanyId === c.id && 'bg-surface-raised shadow-brand',
                     )}
                   >
                     <span className="font-medium text-text-primary">{c.name}</span>

@@ -1,5 +1,6 @@
-import { AdminPlatformDashboard } from '@/components/admin/admin-platform-dashboard';
+import { redirect } from 'next/navigation';
 
-export default function AdminPlatformPage(): JSX.Element {
-  return <AdminPlatformDashboard />;
+/** Legacy platform home — dashboard content lives at `/dashboard`. */
+export default function AdminPlatformPage(): never {
+  redirect('/dashboard');
 }

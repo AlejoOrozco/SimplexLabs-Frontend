@@ -9,6 +9,7 @@ import { TakeoverDialog } from '@/features/conversations/components/takeover-dia
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { useConversationThread } from '@/features/conversations/hooks/use-conversation-thread';
 import { sendConversationMessage } from '@/features/conversations/api/conversations.api';
+import { PageMeta } from '@/components/layout/page-meta';
 import { notify } from '@/lib/toast';
 
 interface ThreadPageProps {
@@ -25,11 +26,11 @@ export default function ConversationThreadPage({ params }: ThreadPageProps): JSX
   }
   if (conversationQuery.isError || messagesQuery.isError || !conversationQuery.data || !messagesQuery.data) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4">
+      <div className="rounded-lg border border-error bg-error-surface p-4">
         <p className="font-medium text-error-dark">Failed to load conversation.</p>
         <button
           type="button"
-          className="mt-3 rounded-md border border-border-default bg-surface-page px-3 py-1.5 text-sm"
+          className="mt-3 rounded-md border border-border-default bg-surface-base px-3 py-1.5 text-sm"
           onClick={() => {
             void conversationQuery.refetch();
             void messagesQuery.refetch();
@@ -61,11 +62,11 @@ export default function ConversationThreadPage({ params }: ThreadPageProps): JSX
 
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <PageMeta
+        title="Conversation thread"
+        description={`Status: ${conversationQuery.data.lifecycleStatus}`}
+      />
       <div className="space-y-4">
-        <div className="rounded border p-3">
-          <h1 className="font-semibold">Conversation thread</h1>
-          <p className="text-xs text-slate-500">{conversationQuery.data.lifecycleStatus}</p>
-        </div>
         <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto rounded border p-3">
           {messagesQuery.data.length === 0 ? (
             <EmptyState title="No messages yet" description="Send a message to start the thread." />

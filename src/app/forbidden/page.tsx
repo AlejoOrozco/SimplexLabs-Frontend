@@ -10,7 +10,7 @@ export default function ForbiddenPage(): JSX.Element {
       </p>
       <Link
         href="/dashboard"
-        className="rounded-md border border-border-default bg-surface-page px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-raised"
+        className="rounded-md border border-border-default bg-surface-base px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-raised"
       >
         Go to dashboard
       </Link>

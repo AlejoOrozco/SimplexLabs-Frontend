@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { AccountDeactivatedModalRoot } from '@/components/auth/AccountDeactivatedModal';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import { ModalProvider } from '@/context/modal-context';
+import { shouldIgnoreSpuriousSessionExpiredLogout } from '@/lib/auth/auth-failure-suppression';
 import { POST_LOGIN_REDIRECT_KEY } from '@/lib/auth/post-login-redirect';
 import { eventBus } from '@/lib/realtime/event-bus';
 import { getSocket } from '@/lib/realtime/socket';
@@ -38,6 +39,7 @@ function SessionExpiredCoordinator(): null {
 
     const offSession = eventBus.on('session:expired', () => {
       if (isLoggingOutRef.current) return;
+      if (shouldIgnoreSpuriousSessionExpiredLogout()) return;
       isLoggingOutRef.current = true;
       dismissSessionToast();
       sessionExpiredToastIdRef.current = notify.warning('Your session has expired', {
@@ -94,7 +96,7 @@ export function AppProviders({ children }: { children: ReactNode }): JSX.Element
           position="bottom-right"
           closeButton
           visibleToasts={3}
-          toastOptions={{ className: 'border border-border-default bg-surface-page text-text-primary' }}
+          toastOptions={{ className: 'border border-border-default bg-surface-overlay text-text-primary' }}
         />
       </AuthProvider>
     </QueryClientProvider>

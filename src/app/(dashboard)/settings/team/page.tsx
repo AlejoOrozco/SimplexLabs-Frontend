@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { PageMeta } from '@/components/layout/page-meta';
 import { UserPermissionsPanel } from '@/components/permissions/user-permissions-panel';
 import { SkeletonCard } from '@/components/shared/Skeleton';
 import { getUsers } from '@/lib/api/users.api';
@@ -37,13 +38,11 @@ export default function TeamPermissionsPage(): JSX.Element {
     selectedUserId !== null ? teammates.find((u) => u.id === selectedUserId) ?? null : null;
 
   return (
-    <section className="mx-auto max-w-4xl space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-text-primary">Team & permissions</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Choose a teammate to review or adjust their individual permissions.
-        </p>
-      </div>
+    <section className="mx-auto max-w-4xl space-y-6">
+      <PageMeta
+        title="Team & permissions"
+        description="Choose a teammate to review or adjust their individual permissions."
+      />
 
       {!companyId ? (
         <p className="text-sm text-text-secondary">You must belong to a company to manage team permissions.</p>
@@ -60,7 +59,7 @@ export default function TeamPermissionsPage(): JSX.Element {
 
       {teammates.length > 0 ? (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
-          <nav className="space-y-1 rounded-xl border border-border-default bg-surface-page p-2">
+          <nav className="space-y-1 rounded-xl border border-border-default bg-surface-base p-2">
             {teammates.map((u) => {
               const name = fullName(u);
               const active = u.id === selectedUserId;
@@ -71,7 +70,7 @@ export default function TeamPermissionsPage(): JSX.Element {
                   onClick={() => setSelectedUserId(u.id)}
                   className={cn(
                     'flex w-full flex-col rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                    active ? 'bg-brand-50 text-text-brand' : 'text-text-primary hover:bg-surface-raised',
+                    active ? 'bg-surface-raised text-text-brand shadow-brand' : 'text-text-primary hover:bg-surface-overlay',
                   )}
                 >
                   <span className="font-medium">{name}</span>

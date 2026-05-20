@@ -155,7 +155,7 @@ export function CompanyCreationWizard({ returnTo }: CompanyCreationWizardProps):
   };
 
   if (success) {
-    const userWizardHref = appendCompanyIdParam('/admin/onboarding?step=2&mode=client', success.companyId);
+    const userWizardHref = appendCompanyIdParam('/admin/onboarding?mode=client', success.companyId);
     return (
       <div className="mx-auto max-w-lg space-y-6 text-center">
         <h2 className="text-2xl font-semibold text-text-primary">Company created</h2>
@@ -204,8 +204,8 @@ export function CompanyCreationWizard({ returnTo }: CompanyCreationWizardProps):
               className={cn(
                 'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                 isCurrent
-                  ? 'border-brand-500 bg-brand-50 text-text-brand'
-                  : 'border-border-default bg-surface-page text-text-secondary hover:bg-neutral-50',
+                  ? 'border-border-focus bg-surface-raised text-text-brand shadow-brand'
+                  : 'border-border-default bg-surface-base text-text-secondary hover:bg-surface-raised',
               )}
             >
               <span className="tabular-nums">{s.number}</span>

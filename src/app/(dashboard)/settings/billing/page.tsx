@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { PageMeta } from '@/components/layout/page-meta';
 import { Badge } from '@/components/ui/badge';
 import { getClientSubscriptionBillingOverview } from '@/lib/api/subscription-billing.api';
 import { getSubscriptions } from '@/lib/api/subscriptions.api';
@@ -24,18 +25,16 @@ export default function BillingSettingsPage(): JSX.Element {
   const fallbackSubs = subsFallback.data ?? [];
 
   return (
-    <section className="mx-auto max-w-3xl space-y-8 p-6">
-      <header>
-        <h1 className="text-2xl font-semibold text-text-primary">Billing & subscriptions</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Plans by category, renewal dates, and invoice history for your company (scoped by your session).
-        </p>
-      </header>
+    <section className="mx-auto max-w-3xl space-y-8">
+      <PageMeta
+        title="Billing & subscriptions"
+        description="Plans by category, renewal dates, and invoice history for your company (scoped by your session)."
+      />
 
       {overviewQuery.isLoading ? (
         <p className="text-sm text-text-secondary">Loading billing…</p>
       ) : overviewQuery.isError ? (
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <p className="text-sm text-text-secondary">
             Detailed billing overview is unavailable. Showing subscriptions list only.
           </p>
@@ -58,7 +57,7 @@ export default function BillingSettingsPage(): JSX.Element {
       ) : overview ? (
         <>
           {overview.scheduledUpgrade ? (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-900">
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border-focus bg-surface-raised px-4 py-3 text-sm text-text-primary shadow-brand">
               <Badge variant="neutral">Scheduled upgrade</Badge>
               <span>
                 {overview.scheduledUpgrade.planName} on {formatDate(overview.scheduledUpgrade.effectiveAt)}

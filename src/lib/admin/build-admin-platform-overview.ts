@@ -3,7 +3,7 @@ import type { Appointment, Company, Order, Subscription } from '@/lib/types';
 import { OrderStatus, SubStatus } from '@/lib/types';
 import { subStatusLabel } from '@/lib/utils/format';
 
-export interface AdminClientOverviewRow {
+export interface AdminCompanyOverviewRow {
   companyId: string;
   companyName: string;
   planName: string;
@@ -21,13 +21,13 @@ export interface AdminPlatformAppointmentLine {
 }
 
 export interface AdminPlatformOverviewModel {
-  activeClients: number;
+  activeCompanies: number;
   totalCompanies: number;
   estimatedMrr: number;
   agentFailureCount: number | null;
   agentRevenueMonth: number;
   upcomingAppointments: AdminPlatformAppointmentLine[];
-  clientRows: AdminClientOverviewRow[];
+  companyRows: AdminCompanyOverviewRow[];
 }
 
 function isCurrentMonth(iso: string): boolean {
@@ -86,7 +86,7 @@ export function buildAdminPlatformOverview(input: {
 
   const companyById = new Map(companies.map((c) => [c.id, c]));
 
-  const clientRows: AdminClientOverviewRow[] = companies.map((company) => {
+  const companyRows: AdminCompanyOverviewRow[] = companies.map((company) => {
     const sub = pickSubscriptionForCompany(subscriptions, company.id);
     const planName = sub?.plan?.name ?? '—';
     const statusLabel = sub ? subStatusLabel(sub.status) : '—';
@@ -103,7 +103,7 @@ export function buildAdminPlatformOverview(input: {
     };
   });
 
-  clientRows.sort((a, b) => a.companyName.localeCompare(b.companyName));
+  companyRows.sort((a, b) => a.companyName.localeCompare(b.companyName));
 
   const now = Date.now();
   const upcomingAppointments: AdminPlatformAppointmentLine[] = [...appointments]
@@ -122,12 +122,12 @@ export function buildAdminPlatformOverview(input: {
     });
 
   return {
-    activeClients: activeCompanyIds.size,
+    activeCompanies: activeCompanyIds.size,
     totalCompanies: companies.length,
     estimatedMrr,
     agentFailureCount,
     agentRevenueMonth: confirmedPaymentsTotalThisMonth(payments),
     upcomingAppointments,
-    clientRows,
+    companyRows,
   };
 }

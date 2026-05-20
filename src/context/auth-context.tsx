@@ -13,6 +13,7 @@ import {
 } from 'react';
 import * as authApi from '@/lib/api/auth.api';
 import { setAuthFailureHandler } from '@/lib/api/client';
+import { armAuthFailureSuppression, shouldSuppressAuthFailureCall } from '@/lib/auth/auth-failure-suppression';
 import { POST_LOGIN_REDIRECT_KEY } from '@/lib/auth/post-login-redirect';
 import { getDefaultAuthenticatedHomePath } from '@/lib/auth/session-role-utils';
 import { writeAuthProfile } from '@/lib/auth/profile-cache';
@@ -73,9 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       if (sessionHydrationGenerationRef.current !== startGen) return;
       setUser(null);
     } finally {
-      if (sessionHydrationGenerationRef.current === startGen) {
-        setIsLoading(false);
-      }
+      // Always clear: if this run was superseded by login/logout, the guarded try/catch
+      // returns early and we must not leave `isLoading` stuck true (would brick the UI).
+      setIsLoading(false);
     }
   }, []);
 
@@ -87,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
 
   useEffect(() => {
     setAuthFailureHandler(() => {
+      if (shouldSuppressAuthFailureCall()) return;
       clearSession();
     });
     return () => setAuthFailureHandler(null);
@@ -95,6 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   const login = useCallback<AuthContextValue['login']>(
     async (dto) => {
       bumpSessionHydrationGeneration();
+      // Arm before `await` so a stale bootstrap `/auth/me` → `/auth/refresh` failure cannot
+      // run `onAuthFailure` (microtask ordering) before suppression is active.
+      armAuthFailureSuppression();
       try {
         const authed = await authApi.login(dto);
         setUser(authed);
@@ -103,17 +108,15 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
           typeof window !== 'undefined' ? sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY) : null;
         if (redirectTo) {
           sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
-          router.replace(redirectTo);
-          router.refresh();
+          window.location.assign(redirectTo);
           return;
         }
-        router.replace(getDefaultAuthenticatedHomePath(authed.roleName));
-        router.refresh();
+        window.location.assign(getDefaultAuthenticatedHomePath());
       } finally {
         setIsLoading(false);
       }
     },
-    [bumpSessionHydrationGeneration, router],
+    [bumpSessionHydrationGeneration],
   );
 
   const logout = useCallback<AuthContextValue['logout']>(async () => {

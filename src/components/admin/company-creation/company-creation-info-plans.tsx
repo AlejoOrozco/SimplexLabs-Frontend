@@ -11,6 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { buildOnboardingPlanPickRows } from '@/lib/plans/group-plans-for-onboarding';
+import {
+  onboardingPlanCellInteractiveClasses,
+  planCategoryHeadingClass,
+} from '@/lib/plans/onboarding-plan-cell-classes';
 import type { CompanyBillingCycle } from '@/lib/types/admin-provisioning';
 import type { CompanyWizardState } from '@/lib/types/company-creation-wizard-state';
 import { setCompanyWizardBillingCycle, upsertPlanDraftRow } from '@/lib/types/company-creation-wizard-state';
@@ -145,7 +149,12 @@ export function CompanyPlansStepSection({
             const selectedId = state.plans.find((p) => p.category === row.category)?.planId;
             return (
               <div key={row.category}>
-                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-text-secondary">
+                <p
+                  className={cn(
+                    'mb-3 text-xs font-bold uppercase tracking-wider',
+                    planCategoryHeadingClass(row.category),
+                  )}
+                >
                   {categoryHeading(row.category)}
                 </p>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -165,10 +174,11 @@ export function CompanyPlansStepSection({
                         }}
                         className={cn(
                           'flex min-h-[11rem] flex-col rounded-xl border p-4 text-left transition-colors',
-                          !plan &&
-                            'cursor-not-allowed border-border-default bg-surface-raised text-text-secondary opacity-70',
-                          plan && !selected && 'border-border-default bg-surface-page hover:border-brand-400',
-                          selected && 'border-brand-500 bg-brand-50 ring-2 ring-brand-500/30',
+                          onboardingPlanCellInteractiveClasses(row.category, {
+                            disabled: !plan,
+                            selected,
+                            hasPlan: Boolean(plan),
+                          }),
                         )}
                       >
                         <p className="text-xs font-bold uppercase tracking-wide text-text-secondary">{cell.tierLabel}</p>
@@ -207,7 +217,9 @@ export function CompanyPlansStepSection({
               key={cycle}
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm',
-                state.billingCycle === cycle ? 'border-brand-500 bg-brand-50' : 'border-border-default bg-surface-page',
+                state.billingCycle === cycle
+                  ? 'border-border-focus bg-surface-raised text-text-brand shadow-brand'
+                  : 'border-border-default bg-surface-base',
               )}
             >
               <input

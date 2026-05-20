@@ -24,7 +24,7 @@ export function EmptyState({
         className,
       )}
     >
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-page text-text-secondary">
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-overlay text-text-secondary">
         {icon ?? <Inbox className="h-5 w-5" />}
       </span>
       <p className="text-sm font-semibold text-text-primary">{title}</p>

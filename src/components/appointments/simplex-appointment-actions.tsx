@@ -48,7 +48,7 @@ function SimplexAppointmentActionsInner({ appointment }: { appointment: Appointm
 
   if (callbackRequested) {
     return (
-      <div className="rounded-lg border border-warning bg-warning-light p-3 text-sm text-warning-dark">
+      <div className="rounded-lg border border-warning bg-warning-surface p-3 text-sm text-warning-dark">
         <div className="flex items-start gap-2">
           <Phone className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <p>You requested a callback. Our team will contact you shortly.</p>

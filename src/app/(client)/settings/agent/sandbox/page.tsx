@@ -1,10 +1,9 @@
-export default function AgentSandboxPage(): JSX.Element {
+import { PageMeta } from '@/components/layout/page-meta';
+
+export default function SandboxPage(): JSX.Element {
   return (
     <section>
-      <h1 className="text-xl font-semibold">Sandbox</h1>
-      <p className="mt-2 text-sm text-slate-600">
-        Dry-run prompt pipelines with no production side effects and per-step execution output.
-      </p>
+      <PageMeta title="Sandbox" description="Test agent replies in a safe environment before going live." />
     </section>
   );
 }

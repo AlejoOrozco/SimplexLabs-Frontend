@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (error) {
       if (fallback) return fallback(error, this.reset);
       return (
-        <div role="alert" className="rounded-lg border border-error bg-error-light p-4 text-sm">
+        <div role="alert" className="rounded-lg border border-error bg-error-surface p-4 text-sm">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-error-dark" />
             <p className="font-semibold text-error-dark">Something went wrong</p>
@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <button
             type="button"
             onClick={this.reset}
-            className="mt-3 rounded-md border border-border-default bg-surface-page px-3 py-1 text-xs text-text-primary"
+            className="mt-3 rounded-md border border-border-default bg-surface-base px-3 py-1 text-xs text-text-primary"
           >
             Try again
           </button>

@@ -14,6 +14,7 @@ import {
 import { SkeletonCard, SkeletonStat } from '@/components/shared/Skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { buildAdminPlatformOverview } from '@/lib/admin/build-admin-platform-overview';
+import { adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
 import { getMe } from '@/lib/api/auth.api';
 import { getAdminDashboardStats, getAdminSubscriptionBillingOverview } from '@/lib/api/admin-dashboard.api';
 import { getPayments } from '@/lib/api/payments.api';
@@ -121,7 +122,7 @@ export function AdminPlatformDashboard(): JSX.Element {
 
   if (isErrorCore || !model) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4">
+      <div className="rounded-lg border border-error bg-error-surface p-4">
         <p className="font-medium text-error-dark">Could not load platform metrics.</p>
       </div>
     );
@@ -136,7 +137,7 @@ export function AdminPlatformDashboard(): JSX.Element {
   const billing = billingOverviewQuery.data;
   const adminStats = adminStatsQuery.data;
   const mrrDisplay = billing ? billing.mrrCents / 100 : model.estimatedMrr;
-  const activeClientsDisplay = adminStats?.activeCompanies ?? model.activeClients;
+  const activeCompaniesDisplay = adminStats?.activeCompanies ?? model.activeCompanies;
 
   return (
     <section className="space-y-8">
@@ -148,15 +149,15 @@ export function AdminPlatformDashboard(): JSX.Element {
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
             <Users className="h-4 w-4 shrink-0" aria-hidden />
-            Active clients
+            Active companies
           </div>
-          <p className="mt-3 text-3xl font-semibold tabular-nums">{activeClientsDisplay}</p>
+          <p className="mt-3 text-3xl font-semibold tabular-nums">{activeCompaniesDisplay}</p>
           <p className="mt-1 text-xs text-text-secondary">Companies with an active subscription</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
             <Building2 className="h-4 w-4 shrink-0" aria-hidden />
             Total companies
@@ -164,7 +165,7 @@ export function AdminPlatformDashboard(): JSX.Element {
           <p className="mt-3 text-3xl font-semibold tabular-nums">{model.totalCompanies}</p>
           <p className="mt-1 text-xs text-text-secondary">Registered organizations</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
             <DollarSign className="h-4 w-4 shrink-0" aria-hidden />
             Est. MRR
@@ -174,7 +175,7 @@ export function AdminPlatformDashboard(): JSX.Element {
             {billing ? 'MRR from billing service' : 'Sum of active plan prices*'}
           </p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <div className="flex items-center gap-2 text-sm text-text-secondary">
             <Workflow className="h-4 w-4 shrink-0" aria-hidden />
             Agent failures
@@ -192,13 +193,13 @@ export function AdminPlatformDashboard(): JSX.Element {
 
       {!billing ? (
         <p className="text-xs text-text-secondary">
-          *MRR is an estimate from each client&apos;s current active plan list price; actual billing may differ.
+          *MRR is an estimate from each company&apos;s current active plan list price; actual billing may differ.
         </p>
       ) : null}
 
       {billing && (billing.dueSoon.length > 0 || billing.overdue.length > 0) ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-border-default bg-surface-page p-4">
+          <div className="rounded-lg border border-border-default bg-surface-base p-4">
             <h3 className="text-sm font-semibold text-text-primary">Due soon</h3>
             <ul className="mt-3 space-y-2 text-sm">
               {billing.dueSoon.length === 0 ? (
@@ -215,7 +216,7 @@ export function AdminPlatformDashboard(): JSX.Element {
               )}
             </ul>
           </div>
-          <div className="rounded-lg border border-border-default bg-surface-page p-4">
+          <div className="rounded-lg border border-border-default bg-surface-base p-4">
             <h3 className="text-sm font-semibold text-text-primary">Overdue</h3>
             <ul className="mt-3 space-y-2 text-sm">
               {billing.overdue.length === 0 ? (
@@ -236,14 +237,14 @@ export function AdminPlatformDashboard(): JSX.Element {
       ) : null}
       <>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <h3 className="text-sm font-semibold text-text-primary">Agent revenue</h3>
           <p className="text-xs text-text-secondary">Confirmed platform payments this month</p>
           <p className="mt-4 text-3xl font-semibold tabular-nums">{formatCurrency(model.agentRevenueMonth)}</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <h3 className="text-sm font-semibold text-text-primary">Upcoming appointments</h3>
-          <p className="text-xs text-text-secondary">With clients (next 8)</p>
+          <p className="text-xs text-text-secondary">With companies (next 8)</p>
           <ul className="mt-4 space-y-2">
             {model.upcomingAppointments.length === 0 ? (
               <li className="text-sm text-text-secondary">No upcoming appointments.</li>
@@ -261,8 +262,8 @@ export function AdminPlatformDashboard(): JSX.Element {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border-default bg-surface-page p-4">
-        <h3 className="text-sm font-semibold text-text-primary">Client overview</h3>
+      <div className="rounded-lg border border-border-default bg-surface-base p-4">
+        <h3 className="text-sm font-semibold text-text-primary">Company overview</h3>
         <p className="mb-4 text-xs text-text-secondary">
           Per-company revenue uses completed orders this month (payment attribution coming later).
         </p>
@@ -278,10 +279,10 @@ export function AdminPlatformDashboard(): JSX.Element {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {model.clientRows.map((row) => (
+            {model.companyRows.map((row) => (
               <TableRow key={row.companyId}>
                 <TableCell className="font-medium">
-                  <Link href={`/admin/clients/${row.companyId}`} className="text-text-brand hover:underline">
+                  <Link href={adminCompanyWorkspaceHref(row.companyId)} className="text-text-brand hover:underline">
                     {row.companyName}
                   </Link>
                 </TableCell>
@@ -300,7 +301,7 @@ export function AdminPlatformDashboard(): JSX.Element {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/admin/clients/${row.companyId}`}>Client workspace</Link>
+                        <Link href={adminCompanyWorkspaceHref(row.companyId)}>Company workspace</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/admin/companies">Companies</Link>

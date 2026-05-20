@@ -43,7 +43,7 @@ export function AppointmentsTab({ companyId }: AppointmentsTabProps): JSX.Elemen
   }
   if (query.isError) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4 text-sm text-error-dark">
+      <div className="rounded-lg border border-error bg-error-surface p-4 text-sm text-error-dark">
         Could not load appointments.
       </div>
     );
@@ -53,7 +53,7 @@ export function AppointmentsTab({ companyId }: AppointmentsTabProps): JSX.Elemen
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-text-secondary">
-          SimplexLabs-with-client and client appointments for this tenant.
+          SimplexLabs ↔ company meetings and other appointment types for this tenant.
         </p>
         <Button type="button" onClick={() => setScheduleOpen(true)}>
           New SimplexLabs appointment
@@ -81,7 +81,7 @@ export function AppointmentsTab({ companyId }: AppointmentsTabProps): JSX.Elemen
           {rows.map((a) => {
             const needsCallback = appointmentNeedsCallback(a);
             return (
-              <li key={a.id} className="rounded-lg border border-border-default bg-surface-page p-3 text-sm">
+              <li key={a.id} className="rounded-lg border border-border-default bg-surface-base p-3 text-sm">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="font-medium text-text-primary">{a.title}</p>

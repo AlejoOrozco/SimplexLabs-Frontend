@@ -83,11 +83,11 @@ export function AttendeeSearch({
           }}
           onFocus={() => setIsOpen(true)}
           placeholder="Search by name, email, or phone..."
-          className="w-full rounded-lg border border-border-default bg-surface-page px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary transition-colors focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          className="w-full rounded-lg border border-border-default bg-surface-sunken px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary transition-colors focus:border-border-focus focus:outline-none focus:ring-1 focus:ring-border-focus/50"
         />
 
         {isOpen && query.length >= 2 ? (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-72 overflow-y-auto overflow-x-hidden rounded-lg border border-border-default bg-surface-page shadow-lg">
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-72 overflow-y-auto overflow-x-hidden rounded-lg border border-border-default bg-surface-overlay shadow-lg">
             {isLoading ? (
               <div className="px-3 py-2 text-sm text-text-secondary">Searching…</div>
             ) : null}
@@ -116,8 +116,8 @@ export function AttendeeSearch({
                         }}
                         className="flex w-full items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-surface-raised"
                       >
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-100">
-                          <span className="text-xs font-medium text-brand-700">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-raised">
+                          <span className="text-xs font-medium text-text-brand">
                             {result.name.charAt(0).toUpperCase()}
                           </span>
                         </div>

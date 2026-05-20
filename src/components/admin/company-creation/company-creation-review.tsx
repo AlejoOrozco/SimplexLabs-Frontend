@@ -39,7 +39,7 @@ export function CompanyReviewStepSection({ state, plans, isSubmitting, onSubmit 
     <div className="space-y-6">
       <p className="text-sm text-text-secondary">Review everything before creating the company. No user account is created in this flow.</p>
 
-      <details className="rounded-lg border border-border-default bg-surface-page" open>
+      <details className="rounded-lg border border-border-default bg-surface-base" open>
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-text-primary">
           Company
         </summary>
@@ -65,7 +65,7 @@ export function CompanyReviewStepSection({ state, plans, isSubmitting, onSubmit 
         </div>
       </details>
 
-      <details className="rounded-lg border border-border-default bg-surface-page" open>
+      <details className="rounded-lg border border-border-default bg-surface-base" open>
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-text-primary">
           Plans ({dto.plans.length}) · {state.billingCycle === 'ANNUAL' ? 'Annual' : 'Monthly'}
         </summary>
@@ -90,7 +90,7 @@ export function CompanyReviewStepSection({ state, plans, isSubmitting, onSubmit 
       </details>
 
       {companyHasAgentsPlan(state) && dto.agentConfig ? (
-        <details className="rounded-lg border border-border-default bg-surface-page" open>
+        <details className="rounded-lg border border-border-default bg-surface-base" open>
           <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-text-primary">
             Agent
           </summary>
@@ -115,7 +115,7 @@ export function CompanyReviewStepSection({ state, plans, isSubmitting, onSubmit 
         </details>
       ) : null}
 
-      <details className="rounded-lg border border-border-default bg-surface-page" open>
+      <details className="rounded-lg border border-border-default bg-surface-base" open>
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-text-primary">
           WhatsApp
         </summary>

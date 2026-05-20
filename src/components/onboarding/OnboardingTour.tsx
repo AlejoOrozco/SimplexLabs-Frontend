@@ -59,7 +59,7 @@ export function OnboardingTour(): JSX.Element | null {
       scrollToFirstStep
       onEvent={handleEvent}
       options={{
-        primaryColor: 'var(--color-brand-500)',
+        primaryColor: 'var(--color-brand)',
         backgroundColor: 'var(--surface-page)',
         textColor: 'var(--text-primary)',
         arrowColor: 'var(--surface-page)',

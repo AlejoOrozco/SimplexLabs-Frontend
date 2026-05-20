@@ -23,7 +23,7 @@ export function AgentPerformanceTab({ companyId }: AgentPerformanceTabProps): JS
   }
   if (conversationsQuery.isError) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4 text-sm text-error-dark">
+      <div className="rounded-lg border border-error bg-error-surface p-4 text-sm text-error-dark">
         Could not load agent performance data.
       </div>
     );
@@ -34,7 +34,7 @@ export function AgentPerformanceTab({ companyId }: AgentPerformanceTabProps): JS
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <p className="text-xs text-text-secondary">Agent run success rate (proxy)</p>
           <p className="mt-2 text-3xl font-semibold tabular-nums">
             {snapshot.agentSuccessRatePercent !== null ? `${snapshot.agentSuccessRatePercent}%` : '—'}
@@ -43,23 +43,23 @@ export function AgentPerformanceTab({ companyId }: AgentPerformanceTabProps): JS
             Share of conversations in a closed or resolved lifecycle state (labels vary by backend).
           </p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <p className="text-xs text-text-secondary">Average response time</p>
           <p className="mt-2 text-3xl font-semibold">—</p>
           <p className="mt-1 text-xs text-text-secondary">Requires message-level timing from the analytics API.</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <p className="text-xs text-text-secondary">Token usage this month</p>
           <p className="mt-2 text-3xl font-semibold">—</p>
           <p className="mt-1 text-xs text-text-secondary">Wire to billing or observability when available.</p>
         </div>
-        <div className="rounded-lg border border-border-default bg-surface-page p-4">
+        <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <p className="text-xs text-text-secondary">Total conversations</p>
           <p className="mt-2 text-3xl font-semibold tabular-nums">{snapshot.totalConversations}</p>
         </div>
       </div>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Lifecycle mix</h3>
         <ul className="mt-2 space-y-1 text-sm">
           {snapshot.lifecycleBreakdown.length === 0 ? (
@@ -75,7 +75,7 @@ export function AgentPerformanceTab({ companyId }: AgentPerformanceTabProps): JS
         </ul>
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Most common intents</h3>
         <p className="mt-1 text-sm text-text-secondary">
           Intent histogram needs aggregated analytics from agent runs. Until then, inspect individual threads from
@@ -83,7 +83,7 @@ export function AgentPerformanceTab({ companyId }: AgentPerformanceTabProps): JS
         </p>
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Recent failures</h3>
         <p className="mt-1 text-sm text-text-secondary">
           Per-company failure feeds will map here. Use the platform DLQ for now.

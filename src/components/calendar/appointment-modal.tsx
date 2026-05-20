@@ -38,7 +38,7 @@ interface AppointmentModalProps {
   open: boolean;
   initialDate?: string;
   initialTime?: string;
-  /** When set (e.g. admin client workspace), creation is scoped to this tenant. */
+  /** When set (e.g. admin company workspace), creation is scoped to this tenant. */
   companyId?: string;
   onClose: () => void;
 }
@@ -185,7 +185,7 @@ export function AppointmentModal({
         if (!next) onClose();
       }}
     >
-      <DialogContent className="max-w-md border-border-default bg-surface-page text-text-primary">
+      <DialogContent className="max-w-md border-border-default bg-surface-overlay text-text-primary">
         <DialogHeader>
           <DialogTitle>New appointment</DialogTitle>
           <DialogDescription className="text-text-secondary">

@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { PageMeta } from '@/components/layout/page-meta';
 import { UserPermissionsPanel } from '@/components/permissions/user-permissions-panel';
 import { SkeletonCard } from '@/components/shared/Skeleton';
 import { getUser } from '@/lib/api/users.api';
@@ -24,26 +24,18 @@ export default function AdminUserPermissionsPage(): JSX.Element {
           firstName: userQuery.data.firstName,
           lastName: userQuery.data.lastName,
         })
-      : userId;
+      : 'User permissions';
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6 p-6">
-      <div>
-        <Link
-          href="/admin"
-          className="text-sm font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
-        >
-          ← Admin
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-text-primary">User permissions</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Manage overrides for this user. Role defaults still apply unless toggled here.
-        </p>
-      </div>
+    <section className="mx-auto max-w-3xl space-y-6">
+      <PageMeta
+        title={displayName}
+        description="Manage overrides for this user. Role defaults still apply unless toggled here."
+      />
 
       {userQuery.isLoading ? <SkeletonCard /> : null}
       {userQuery.isError ? (
-        <div className="rounded-lg border border-error bg-error-light p-4 text-sm text-error-dark">
+        <div className="rounded-lg border border-error bg-error-surface p-4 text-sm text-error-dark">
           Could not load this user.
         </div>
       ) : null}

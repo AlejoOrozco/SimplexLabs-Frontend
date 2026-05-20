@@ -25,7 +25,7 @@ export function AvailabilityIndicator({
 
   if (availability.available) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-[var(--color-success)] bg-[var(--color-success-light)] p-3 text-sm text-[var(--color-success-dark)]">
+      <div className="flex items-center gap-2 rounded-lg border border-success bg-success-surface p-3 text-sm text-success-dark">
         <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
         This time slot is available
       </div>
@@ -33,7 +33,7 @@ export function AvailabilityIndicator({
   }
 
   return (
-    <div className="space-y-2 rounded-lg border border-[var(--color-error)] bg-[var(--color-error-light)] p-3">
+    <div className="space-y-2 rounded-lg border border-error bg-error-surface p-3">
       <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-error-dark)]">
         <XCircle className="h-4 w-4 shrink-0" aria-hidden />
         This slot is not available

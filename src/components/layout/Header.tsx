@@ -21,7 +21,7 @@ export function Header(): JSX.Element {
 
   return (
     <header className="flex h-14 items-center justify-between border-b px-6">
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-text-secondary">
         {user ? <span>Signed in as {fullName(user)}</span> : null}
       </div>
       <div className="flex items-center gap-3">

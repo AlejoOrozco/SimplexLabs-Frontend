@@ -7,7 +7,7 @@ import { OnboardingFormField } from '@/components/admin/onboarding/onboarding-fo
 import type { Company } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 
-const RETURN_TO = encodeURIComponent('/admin/onboarding?step=2&mode=client');
+const RETURN_TO = encodeURIComponent('/admin/onboarding?mode=client');
 
 interface UserClientCompanyStepProps {
   companies: readonly Company[];
@@ -39,13 +39,13 @@ export function UserClientCompanyStep({
       </OnboardingFormField>
 
       {selected ? (
-        <div className="rounded-lg border border-brand-500 bg-brand-50 p-4 text-sm">
+        <div className="rounded-lg border border-border-focus bg-surface-raised p-4 text-sm shadow-brand">
           <p className="font-medium text-text-primary">Selected</p>
           <p className="mt-1 text-text-secondary">{selected.name}</p>
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-border-default bg-surface-page">
+      <div className="rounded-lg border border-border-default bg-surface-base">
         <p className="border-b border-border-default px-3 py-2 text-xs font-semibold uppercase tracking-wide text-text-secondary">
           Results
         </p>
@@ -60,7 +60,7 @@ export function UserClientCompanyStep({
                   onClick={() => onSelectCompany(c)}
                   className={cn(
                     'flex w-full items-center justify-between px-3 py-3 text-left text-sm transition-colors hover:bg-surface-raised',
-                    selectedCompanyId === c.id && 'bg-brand-50',
+                    selectedCompanyId === c.id && 'bg-surface-raised shadow-brand',
                   )}
                 >
                   <span className="font-medium text-text-primary">{c.name}</span>
@@ -93,7 +93,7 @@ function ButtonLinkToCreateCompany(): JSX.Element {
   return (
     <Link
       href={`/admin/companies/create?returnTo=${RETURN_TO}`}
-      className="mt-3 inline-flex rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+      className="mt-3 inline-flex rounded-md bg-brand px-4 py-2 text-sm font-medium text-text-inverse hover:bg-brand-dark"
     >
       Create company first
     </Link>

@@ -1,23 +1,13 @@
-import Link from 'next/link';
-import { ReadOnlyConversationView } from '@/components/admin/client-detail/read-only-conversation-view';
+import { redirect } from 'next/navigation';
+import { adminCompanyConversationHref } from '@/lib/admin/admin-company-workspace-href';
 
-interface AdminClientConversationPageProps {
+interface LegacyAdminCompanyConversationPathRedirectProps {
   params: { companyId: string; conversationId: string };
 }
 
-export default function AdminClientConversationPage({
+/** Legacy URL segment `/admin/clients/.../conversations/...` → Companies workspace conversation. */
+export default function LegacyAdminCompanyConversationPathRedirect({
   params,
-}: AdminClientConversationPageProps): JSX.Element {
-  const { companyId, conversationId } = params;
-  return (
-    <div className="space-y-4">
-      <Link
-        href={`/admin/clients/${companyId}?tab=conversations`}
-        className="text-sm text-text-brand hover:underline"
-      >
-        ← Back to conversations
-      </Link>
-      <ReadOnlyConversationView companyId={companyId} conversationId={conversationId} />
-    </div>
-  );
+}: LegacyAdminCompanyConversationPathRedirectProps): never {
+  redirect(adminCompanyConversationHref(params.companyId, params.conversationId));
 }

@@ -4,10 +4,9 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { AppointmentDetailModal } from '@/components/appointments/AppointmentDetailModal';
 import { AppointmentList } from '@/components/appointments/AppointmentList';
-import { PageShell } from '@/components/layout/page-shell';
+import { PageMeta } from '@/components/layout/page-meta';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SkeletonTable } from '@/components/shared/Skeleton';
-import { Button } from '@/components/ui/button';
 import { useAppointments } from '@/lib/hooks/use-appointments';
 import type { Appointment } from '@/lib/types';
 
@@ -36,27 +35,28 @@ export default function AppointmentsPage(): JSX.Element {
   }, [appointmentsQuery.data, selected]);
 
   return (
-    <PageShell
-      title="Appointments"
-      description="Manage your schedule and meetings. Calendar uses your profile timezone when set."
-    >
-      <div className="mb-4 flex flex-wrap gap-2">
-        <Button
+    <>
+      <PageMeta
+        title="Appointments"
+        description="Manage your schedule and meetings. Calendar uses your profile timezone when set."
+      />
+      <div className="calendar-view-selector mb-4" role="group" aria-label="Appointments layout">
+        <button
           type="button"
-          size="sm"
-          variant={view === 'calendar' ? 'default' : 'outline'}
+          className={view === 'calendar' ? 'active' : undefined}
+          aria-pressed={view === 'calendar'}
           onClick={() => setView('calendar')}
         >
           Calendar
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          size="sm"
-          variant={view === 'list' ? 'default' : 'outline'}
+          className={view === 'list' ? 'active' : undefined}
+          aria-pressed={view === 'list'}
           onClick={() => setView('list')}
         >
           List
-        </Button>
+        </button>
       </div>
 
       {view === 'calendar' ? (
@@ -64,7 +64,7 @@ export default function AppointmentsPage(): JSX.Element {
       ) : appointmentsQuery.isLoading ? (
         <SkeletonTable />
       ) : appointmentsQuery.isError ? (
-        <div className="rounded-lg border border-error bg-error-light p-4 text-sm text-error-dark">
+        <div className="rounded-lg border border-error bg-error-surface p-4 text-sm text-error-dark">
           Could not load appointments.
         </div>
       ) : (
@@ -72,6 +72,6 @@ export default function AppointmentsPage(): JSX.Element {
       )}
 
       <AppointmentDetailModal appointment={selected} open={modalOpen} onOpenChange={setModalOpen} />
-    </PageShell>
+    </>
   );
 }

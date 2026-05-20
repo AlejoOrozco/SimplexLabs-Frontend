@@ -18,22 +18,22 @@ export function StatusHistory({ history }: StatusHistoryProps): JSX.Element {
     <ol className="flex flex-col gap-3 border-l pl-4">
       {history.map((entry) => (
         <li key={entry.id} className="relative">
-          <span className="absolute -left-[21px] top-1.5 block h-2.5 w-2.5 rounded-full border bg-white" />
+          <span className="absolute -left-[21px] top-1.5 block h-2.5 w-2.5 rounded-full border border-border-default bg-surface-base" />
           <div className="flex flex-wrap items-center gap-2 text-sm">
             {entry.prevStatus ? (
               <>
                 <OrderStatusBadge status={entry.prevStatus} />
-                <span className="text-gray-500">→</span>
+                <span className="text-text-tertiary">→</span>
               </>
             ) : null}
             <OrderStatusBadge status={entry.newStatus} />
           </div>
-          <p className="mt-1 text-xs text-gray-600">
+          <p className="mt-1 text-xs text-text-secondary">
             {formatDateTime(entry.createdAt)}
             {entry.changedBy ? <> · {fullName(entry.changedBy)}</> : null}
           </p>
           {entry.reason ? (
-            <p className="mt-1 text-sm text-gray-700">{entry.reason}</p>
+            <p className="mt-1 text-sm text-text-primary">{entry.reason}</p>
           ) : null}
         </li>
       ))}

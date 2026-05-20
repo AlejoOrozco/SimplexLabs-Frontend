@@ -33,14 +33,14 @@ export const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-white p-6 shadow-lg sm:rounded-lg',
+          'fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border border-border-default bg-surface-overlay p-6 text-text-primary shadow-lg sm:rounded-lg',
           className,
         )}
         {...props}
       >
         {children}
         {closable ? (
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none">
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm text-text-secondary opacity-70 transition-opacity hover:opacity-100 focus:outline-none">
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
@@ -91,7 +91,7 @@ export const DialogDescription = React.forwardRef<
   return (
     <DialogPrimitive.Description
       ref={ref}
-      className={cn('text-sm text-gray-600', className)}
+      className={cn('text-sm text-text-secondary', className)}
       {...props}
     />
   );

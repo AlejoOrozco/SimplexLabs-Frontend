@@ -26,7 +26,7 @@ export function AdminUsersList(): JSX.Element {
         }}
       />
       <p className="text-xs text-text-secondary">
-        Tip: use the sidebar <span className="font-medium">Create</span> menu to add users without leaving this list.
+        Use <span className="font-medium">New user</span> above to add users without leaving this page.
       </p>
     </div>
   );

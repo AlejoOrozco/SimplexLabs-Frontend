@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { AgentRunDebugView } from '@/components/admin/failed-tasks/agent-run-debug-view';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { detectFailedAgent } from '@/lib/admin/detect-failed-agent';
+import { adminCompanyConversationHref } from '@/lib/admin/admin-company-workspace-href';
 import type { AgentRun } from '@/lib/types/agent-pipeline-failure';
 import { AgentPipelineStep } from '@/lib/types/agent-pipeline-failure';
 import { formatTimeAgo } from '@/lib/utils/format';
@@ -18,7 +19,10 @@ interface FailedTaskRowProps {
 export function FailedTaskRow({ task }: FailedTaskRowProps): JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const failedAgent = detectFailedAgent(task);
-  const conversationHref = `/admin/clients/${task.conversation.companyId}/conversations/${task.conversation.id}`;
+  const conversationHref = adminCompanyConversationHref(
+    task.conversation.companyId,
+    task.conversation.id,
+  );
 
   return (
     <>

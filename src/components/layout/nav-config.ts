@@ -6,7 +6,6 @@ import {
   Globe,
   Inbox,
   LayoutDashboard,
-  LayoutGrid,
   Settings2,
   ShoppingCart,
   UserCircle,
@@ -54,8 +53,6 @@ const PRIMARY_NAV_ITEMS: readonly NavItem[] = [
 ] as const;
 
 const ADMIN_NAV_ITEMS: readonly NavItem[] = [
-  { href: '/admin', label: 'Platform', icon: LayoutGrid, adminOnly: true },
-  { href: '/admin/clients', label: 'Clients', icon: Users, adminOnly: true },
   { href: '/admin/users', label: 'Users', icon: UserCircle, adminOnly: true },
   { href: '/admin/companies', label: 'Companies', icon: Building2, adminOnly: true },
   { href: '/admin/failed-tasks', label: 'Failed tasks', icon: XCircle, adminOnly: true },

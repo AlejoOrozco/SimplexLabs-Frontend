@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { PageMetaProvider } from '@/components/layout/page-meta';
 import { PageShell } from '@/components/layout/page-shell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
@@ -16,7 +17,7 @@ export function AppShell({ children, session }: AppShellProps): JSX.Element {
   return (
     <SessionShellStateProvider session={session}>
       {({ isSidebarCollapsed, toggleSidebarCollapsed }) => (
-        <div className="h-screen min-w-[1024px] overflow-hidden bg-surface-overlay text-text-primary">
+        <div className="h-screen min-w-[1024px] overflow-hidden bg-surface-page text-text-primary">
           <div className="flex h-full">
             <Sidebar
               isAdmin={session.isAdmin}
@@ -31,7 +32,9 @@ export function AppShell({ children, session }: AppShellProps): JSX.Element {
             />
             <main className="min-w-0 flex-1 overflow-y-auto">
               <ErrorBoundary>
-                <PageShell>{children}</PageShell>
+                <PageMetaProvider>
+                  <PageShell>{children}</PageShell>
+                </PageMetaProvider>
               </ErrorBoundary>
             </main>
           </div>

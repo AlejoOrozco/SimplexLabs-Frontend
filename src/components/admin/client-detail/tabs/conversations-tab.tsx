@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { SkeletonTable } from '@/components/shared/Skeleton';
 import { ConversationRow } from '@/features/conversations/components/conversation-row';
 import { getConversations } from '@/features/conversations/api/conversations.api';
+import { adminCompanyConversationHref } from '@/lib/admin/admin-company-workspace-href';
 
 interface ConversationsTabProps {
   companyId: string;
@@ -24,7 +25,7 @@ export function ConversationsTab({ companyId }: ConversationsTabProps): JSX.Elem
   }
   if (query.isError) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4 text-sm text-error-dark">
+      <div className="rounded-lg border border-error bg-error-surface p-4 text-sm text-error-dark">
         Could not load conversations.
       </div>
     );
@@ -34,7 +35,7 @@ export function ConversationsTab({ companyId }: ConversationsTabProps): JSX.Elem
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-text-primary">
+      <div className="rounded-lg border border-border-focus bg-surface-raised px-4 py-3 text-sm text-text-primary shadow-brand">
         <span className="font-semibold">Read only</span>
         <span className="text-text-secondary"> — You can open threads to review messages. Sending and takeover are disabled.</span>
       </div>
@@ -46,7 +47,7 @@ export function ConversationsTab({ companyId }: ConversationsTabProps): JSX.Elem
             <li key={conversation.id}>
               <ConversationRow
                 conversation={conversation}
-                threadHref={`/admin/clients/${companyId}/conversations/${conversation.id}`}
+                threadHref={adminCompanyConversationHref(companyId, conversation.id)}
               />
             </li>
           ))}

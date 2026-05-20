@@ -1,30 +1,35 @@
 'use client';
 
-const ITEMS: Array<{
-  label: string;
-  className?: string;
-  description?: string;
-}> = [
-  { label: 'SimplexLabs meeting', className: 'event-brand' },
-  { label: 'Customer appointment', className: 'event-info' },
-  { label: 'External', className: 'event-neutral' },
-  { label: 'Pending confirmation', description: 'dashed border' },
-  { label: 'Callback requested', description: 'amber pulse' },
-];
+const LEGEND_ITEMS = [
+  {
+    label: 'SimplexLabs meeting',
+    swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-agents',
+  },
+  {
+    label: 'Customer appointment',
+    swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-website',
+  },
+  {
+    label: 'External',
+    swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-neutral',
+  },
+  {
+    label: 'Pending confirmation',
+    swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-pending',
+  },
+  {
+    label: 'Callback requested',
+    swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-callback',
+  },
+] as const;
 
 export function CalendarLegend(): JSX.Element {
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-4">
-      {ITEMS.map((item) => (
-        <div key={item.label} className="flex items-center gap-1.5">
-          <div
-            className={`calendar-event h-3 w-3 rounded-sm ${item.className ?? 'border border-border-default bg-surface-overlay'}`}
-            title={item.description}
-          />
-          <span className="text-xs text-text-secondary">
-            {item.label}
-            {item.description ? ` (${item.description})` : ''}
-          </span>
+    <div className="calendar-legend">
+      {LEGEND_ITEMS.map((item) => (
+        <div key={item.label} className="calendar-legend-item">
+          <span className={item.swatchClassName} aria-hidden />
+          <span className="calendar-legend-label">{item.label}</span>
         </div>
       ))}
     </div>

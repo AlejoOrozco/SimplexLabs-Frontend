@@ -3,16 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'motion/react';
-import { ChevronDown, ChevronLeft, ChevronRight, FlaskConical, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { SimplexLogo } from '@/components/branding/simplex-logo';
 import { getNavSections } from '@/components/layout/nav-config';
 import { SidebarSessionFooter } from '@/components/layout/sidebar-session-footer';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils/cn';
 
 interface SidebarProps {
@@ -49,17 +43,17 @@ export function Sidebar({
         aria-current={isActive ? 'page' : undefined}
         title={isCollapsed ? item.label : undefined}
         className={cn(
-          'group relative flex items-center rounded-md border-l-2 px-3 py-2 text-sm transition-colors',
+          'group relative flex items-center rounded-md border-l-2 px-3 py-1.5 transition-colors',
           isCollapsed ? 'justify-center' : 'gap-2.5',
           isActive
-            ? 'border-l-brand-500 bg-brand-50 text-text-brand'
-            : 'border-l-transparent text-text-secondary hover:bg-neutral-100 hover:text-text-primary',
+            ? 'border-l-brand bg-surface-raised text-text-brand shadow-brand'
+            : 'border-l-transparent text-text-secondary hover:bg-surface-overlay hover:text-text-primary',
         )}
       >
-        <Icon size={18} aria-hidden />
+        <Icon size={16} aria-hidden />
         {!isCollapsed ? <span>{item.label}</span> : null}
         {isCollapsed ? (
-          <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-tooltip -translate-y-1/2 rounded-md border border-border-default bg-surface-page px-2 py-1 text-xs text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+          <span className="pointer-events-none absolute left-[calc(100%+8px)] top-1/2 z-tooltip -translate-y-1/2 rounded-md border border-border-default bg-surface-overlay px-2 py-1 text-[11px] text-text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
             {item.label}
           </span>
         ) : null}
@@ -70,18 +64,23 @@ export function Sidebar({
   return (
     <aside aria-label="Primary" className="h-full self-stretch">
       <motion.div
-        className="relative flex h-full shrink-0 flex-col border-r border-border-default bg-surface-page p-3"
+        className="relative flex h-full shrink-0 flex-col border-r border-border-default bg-surface-base p-3 text-xs leading-snug"
         animate={{ width }}
         transition={{ type: 'spring', stiffness: 240, damping: 26, mass: 0.7 }}
       >
       <div
         className={cn(
-          'mb-4 flex h-10 items-center rounded-md border border-border-default bg-surface-raised px-2',
+          'mb-3 flex items-center rounded-md border border-border-default bg-surface-raised px-2 py-1',
           isCollapsed ? 'justify-center' : 'gap-2',
         )}
       >
-        <FlaskConical size={18} className="text-brand-600" aria-hidden />
-        {!isCollapsed ? <span className="text-sm font-semibold text-text-primary">SimplexLabs</span> : null}
+        <SimplexLogo
+          size={isCollapsed ? 24 : 28}
+          decorative={!isCollapsed}
+          className="rounded-md"
+          priority
+        />
+        {!isCollapsed ? <span className="font-semibold leading-none text-text-primary">SimplexLabs</span> : null}
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">{primary.map(renderNavItem)}</nav>
@@ -89,75 +88,36 @@ export function Sidebar({
       {admin.length > 0 ? (
         <div className="mb-3 mt-3 border-t border-border-default pt-3">
           {!isCollapsed ? (
-            <div className="mb-2 flex items-center justify-between gap-2 px-3">
-              <p className="text-xs font-medium text-text-secondary">Admin</p>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button type="button" variant="outline" size="sm" className="h-8 gap-1 px-2 text-xs">
-                    Create
-                    <ChevronDown className="size-3 opacity-70" aria-hidden />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[10rem]">
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/onboarding">New user</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/companies/create">New company</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="mb-2 px-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-text-secondary">Admin</p>
             </div>
-          ) : (
-            <div className="mb-2 flex justify-center px-1">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-9 shrink-0"
-                    title="Create"
-                    aria-label="Create menu"
-                  >
-                    <Plus size={16} aria-hidden />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="right" align="start" className="min-w-[10rem]">
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/onboarding">New user</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/companies/create">New company</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+          ) : null}
           <nav className="flex flex-col gap-1">{admin.map(renderNavItem)}</nav>
         </div>
       ) : null}
 
-      <SidebarSessionFooter
-        isCollapsed={isCollapsed}
-        userName={session.userName}
-        userEmail={session.userEmail}
-        companyName={session.companyName}
-        subscriptionPlan={session.subscriptionPlan}
-      />
+      <div className="mt-auto flex shrink-0 flex-col gap-2">
+        <SidebarSessionFooter
+          isCollapsed={isCollapsed}
+          userName={session.userName}
+          userEmail={session.userEmail}
+          companyName={session.companyName}
+          subscriptionPlan={session.subscriptionPlan}
+        />
 
-      <button
-        type="button"
-        className={cn(
-          'mt-auto inline-flex h-10 items-center rounded-md border border-border-default bg-surface-raised text-text-secondary transition-colors hover:bg-neutral-100 hover:text-text-primary',
-          isCollapsed ? 'justify-center' : 'justify-between px-3',
-        )}
-        onClick={onToggleCollapsed}
-        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-      >
-        {isCollapsed ? <ChevronRight size={16} aria-hidden /> : <ChevronLeft size={16} aria-hidden />}
-        {!isCollapsed ? <span className="text-sm">Collapse</span> : null}
-      </button>
+        <button
+          type="button"
+          className={cn(
+            'inline-flex h-9 items-center rounded-md border border-border-default bg-surface-raised text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary',
+            isCollapsed ? 'justify-center' : 'justify-between px-3',
+          )}
+          onClick={onToggleCollapsed}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {isCollapsed ? <ChevronRight size={16} aria-hidden /> : <ChevronLeft size={16} aria-hidden />}
+          {!isCollapsed ? <span>Collapse</span> : null}
+        </button>
+      </div>
       </motion.div>
     </aside>
   );

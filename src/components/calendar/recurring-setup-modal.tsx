@@ -77,7 +77,7 @@ export function RecurringSetupModal({
         if (!next) reset();
       }}
     >
-      <DialogContent className="max-w-md border-border-default bg-surface-page text-text-primary">
+      <DialogContent className="max-w-md border-border-default bg-surface-overlay text-text-primary">
         <DialogHeader>
           <DialogTitle>Make recurring</DialogTitle>
           <DialogDescription className="text-text-secondary">

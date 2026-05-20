@@ -29,12 +29,12 @@ export function AccountDeactivatedModal({
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent
-        className="border-border-default bg-surface-page text-center sm:rounded-lg"
+        className="border-border-default bg-surface-base text-center sm:rounded-lg"
         closable={false}
         onEscapeKeyDown={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-light">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-surface">
           <Lock className="h-8 w-8 text-error" aria-hidden />
         </div>
         <h2 className="text-xl font-semibold text-text-primary">Account deactivated</h2>

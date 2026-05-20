@@ -1,4 +1,7 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { PageMeta } from '@/components/layout/page-meta';
 import { cn } from '@/lib/utils/cn';
 
 interface PageWrapperProps {
@@ -9,6 +12,7 @@ interface PageWrapperProps {
   className?: string;
 }
 
+/** @deprecated Prefer PageMeta for shell header title/description and render actions inline. */
 export function PageWrapper({
   title,
   description,
@@ -17,14 +21,9 @@ export function PageWrapper({
   className,
 }: PageWrapperProps): JSX.Element {
   return (
-    <section className={cn('space-y-6 p-6', className)}>
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold">{title}</h1>
-          {description ? <p className="text-sm text-gray-600">{description}</p> : null}
-        </div>
-        {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
-      </header>
+    <section className={cn('space-y-6', className)}>
+      <PageMeta title={title} description={description} />
+      {actions ? <div className="flex items-center justify-end gap-2">{actions}</div> : null}
       <div>{children}</div>
     </section>
   );

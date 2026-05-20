@@ -48,7 +48,7 @@ export function OrdersPaymentsTab({ companyId }: OrdersPaymentsTabProps): JSX.El
             {orders.map((order) => {
               const expanded = openOrderId === order.id;
               return (
-                <li key={order.id} className="rounded-lg border border-border-default bg-surface-page p-3">
+                <li key={order.id} className="rounded-lg border border-border-default bg-surface-base p-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <p className="font-medium text-text-primary">{order.product?.name ?? 'Product'}</p>
@@ -91,7 +91,7 @@ export function OrdersPaymentsTab({ companyId }: OrdersPaymentsTabProps): JSX.El
         ) : (
           <ul className="mt-3 space-y-2">
             {payments.map((p) => (
-              <li key={p.id} className="rounded-lg border border-border-default bg-surface-page p-3 text-sm">
+              <li key={p.id} className="rounded-lg border border-border-default bg-surface-base p-3 text-sm">
                 <div className="flex flex-wrap justify-between gap-2">
                   <span className="font-medium text-text-primary">{p.status}</span>
                   <span className="tabular-nums">{formatCurrency(p.amount)}</span>

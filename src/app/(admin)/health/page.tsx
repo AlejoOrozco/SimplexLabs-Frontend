@@ -1,3 +1,5 @@
+import { PageMeta } from '@/components/layout/page-meta';
+
 export const revalidate = 0;
 
 export default async function AdminHealthPage(): Promise<JSX.Element> {
@@ -12,8 +14,8 @@ export default async function AdminHealthPage(): Promise<JSX.Element> {
 
   return (
     <section>
-      <h1 className="text-xl font-semibold">Operational Health</h1>
-      <pre className="mt-4 overflow-auto rounded bg-slate-900 p-3 text-xs text-slate-100">
+      <PageMeta title="Operational health" description="API readiness and dependency status for platform operators." />
+      <pre className="overflow-auto rounded bg-slate-900 p-3 text-xs text-slate-100">
         {JSON.stringify(payload, null, 2)}
       </pre>
     </section>

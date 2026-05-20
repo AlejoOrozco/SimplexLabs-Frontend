@@ -27,8 +27,8 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
 
   const primaryUser = useMemo(() => {
     const users = usersQuery.data ?? [];
-    const clients = users.filter((u) => u.companyId === companyId && isTenantTeamRole(u.role));
-    return clients.sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
+    const tenantTeamUsers = users.filter((u) => u.companyId === companyId && isTenantTeamRole(u.role));
+    return tenantTeamUsers.sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
   }, [usersQuery.data, companyId]);
 
   if (companyQuery.isLoading || !companyQuery.data) {
@@ -49,7 +49,7 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Company (admin edit)</h3>
         <div className="mt-3">
           <CompanyForm
@@ -65,7 +65,7 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
         </div>
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Agent configuration</h3>
         <p className="mt-1 text-xs text-text-secondary">
           Persona, fallback, escalation, and channel toggles will map to tenant agent settings once the admin proxy
@@ -78,7 +78,7 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
             value={kbNotes}
             onChange={(e) => setKbNotes(e.target.value)}
             rows={3}
-            placeholder="Changes requested by client…"
+            placeholder="Changes requested by the company…"
           />
           <Button
             type="button"
@@ -92,7 +92,7 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
         </div>
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Knowledge base</h3>
         <p className="mt-1 text-xs text-text-secondary">
           Listing and editing KB entries for another tenant requires a scoped admin endpoint. Track content requests
@@ -101,7 +101,7 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
         <Textarea className="mt-3" rows={4} readOnly value="KB admin CRUD is not connected in this build." />
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">WhatsApp number assignment</h3>
         <p className="mt-1 text-xs text-text-secondary">
           Assign or rotate WhatsApp sender IDs when the integration API supports admin writes.
@@ -120,12 +120,12 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
         </div>
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Account</h3>
         {primaryUser ? (
           <ClientAccountActions user={primaryUser} />
         ) : (
-          <p className="mt-2 text-sm text-text-secondary">No client user to deactivate.</p>
+          <p className="mt-2 text-sm text-text-secondary">No company user to deactivate.</p>
         )}
       </section>
     </div>

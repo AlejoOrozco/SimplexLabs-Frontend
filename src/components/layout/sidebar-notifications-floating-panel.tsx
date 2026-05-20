@@ -43,7 +43,7 @@ export function SidebarNotificationsFloatingPanel({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -6, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 280, damping: 24, mass: 0.6 }}
-            className="fixed z-modal w-[380px] max-w-[calc(100vw-2rem)] rounded-lg border border-border-default bg-surface-page shadow-lg"
+            className="fixed z-modal w-[380px] max-w-[calc(100vw-2rem)] rounded-lg border border-border-default bg-surface-overlay shadow-lg"
             style={{ left: `${anchor.left}px`, top: `${anchor.top}px` }}
           >
             <div className="flex items-center justify-between border-b border-border-default px-3 py-2">
@@ -78,20 +78,20 @@ export function SidebarNotificationsFloatingPanel({
                         type="button"
                         onClick={() => onNotificationClick(notification)}
                         className={cn(
-                          'relative w-full rounded-md border p-3 text-left transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-200',
+                          'relative w-full rounded-md border p-3 text-left transition-colors hover:bg-surface-overlay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus/40',
                           isAppointmentCallbackNotification(notification)
                             ? cn(
                                 'border-warning',
-                                notification.isRead ? 'bg-warning-light/70' : 'bg-warning-light',
+                                notification.isRead ? 'bg-warning-surface/70' : 'bg-warning-surface',
                               )
                             : cn(
                                 'border-border-default',
-                                notification.isRead ? 'bg-surface-page' : 'bg-surface-raised',
+                                notification.isRead ? 'bg-surface-sunken' : 'bg-surface-raised',
                               ),
                         )}
                       >
                         {!notification.isRead ? (
-                          <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-brand-500" />
+                          <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-brand" />
                         ) : null}
                         <div className="flex items-start gap-2">
                           <span className="mt-0.5">

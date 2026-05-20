@@ -1,64 +1,74 @@
 'use client';
 
 import { useState } from 'react';
+import { SimplexLogo } from '@/components/branding/simplex-logo';
 import { useAuth } from '@/context/auth-context';
 import { ApiClientError } from '@/lib/api/client';
 
 export default function LoginPage(): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  /** Stays true after a successful sign-in until `window.location.assign` unloads the page. */
+  const [signInCommitPending, setSignInCommitPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, isLoading: authSessionLoading } = useAuth();
+  const { login } = useAuth();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitting(true);
+    if (signInCommitPending) return;
+    setSignInCommitPending(true);
     setError(null);
     try {
       await login({ email, password });
     } catch (unknownError) {
+      setSignInCommitPending(false);
       if (unknownError instanceof ApiClientError && unknownError.code === 'ACCOUNT_DEACTIVATED') return;
       const message = unknownError instanceof Error ? unknownError.message : 'Login failed';
       setError(message);
-    } finally {
-      setSubmitting(false);
     }
   }
 
+  const fieldClass =
+    'w-full rounded-md border border-border-default bg-surface-sunken px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-border-focus focus:outline-none focus:ring-1 focus:ring-border-focus/50';
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center p-6">
-      <h1 className="mb-6 text-xl font-semibold">Sign in</h1>
+      <div className="mb-8 flex justify-center">
+        <SimplexLogo size={80} priority />
+      </div>
+      <h1 className="font-display mb-6 text-center text-3xl font-semibold tracking-tight text-text-primary">
+        Sign in
+      </h1>
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm" htmlFor="email">
+        <label className="block text-sm text-text-secondary" htmlFor="email">
           Email
         </label>
         <input
           id="email"
-          className="w-full rounded border px-3 py-2"
+          className={fieldClass}
           onChange={(event) => setEmail(event.target.value)}
           required
           type="email"
           value={email}
         />
-        <label className="block text-sm" htmlFor="password">
+        <label className="block text-sm text-text-secondary" htmlFor="password">
           Password
         </label>
         <input
           id="password"
-          className="w-full rounded border px-3 py-2"
+          className={fieldClass}
           onChange={(event) => setPassword(event.target.value)}
           required
           type="password"
           value={password}
         />
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-error">{error}</p> : null}
         <button
-          className="w-full rounded bg-black px-3 py-2 text-white"
-          disabled={submitting || authSessionLoading}
+          className="w-full rounded-md border border-transparent bg-gradient-brand px-3 py-2 text-sm font-medium text-text-inverse shadow-brand transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={signInCommitPending}
           type="submit"
         >
-          {submitting ? 'Signing in...' : 'Sign in'}
+          {signInCommitPending ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
     </main>

@@ -38,10 +38,10 @@ export function OverviewTab({ companyId }: OverviewTabProps): JSX.Element {
 
   const primaryUser = useMemo(() => {
     const users = usersQuery.data ?? [];
-    const clientUsers = users.filter(
+    const tenantTeamUsers = users.filter(
       (u) => u.companyId === companyId && isTenantTeamRole(u.role) && u.isActive,
     );
-    return clientUsers.sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
+    return tenantTeamUsers.sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
   }, [usersQuery.data, companyId]);
 
   const companyOrders = useMemo(() => {
@@ -58,7 +58,7 @@ export function OverviewTab({ companyId }: OverviewTabProps): JSX.Element {
   }
   if (companyQuery.isError || !company) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4 text-sm text-error-dark">
+      <div className="rounded-lg border border-error bg-error-surface p-4 text-sm text-error-dark">
         Company could not be loaded.
       </div>
     );
@@ -66,7 +66,7 @@ export function OverviewTab({ companyId }: OverviewTabProps): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Company</h3>
         <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
           <div>
@@ -88,7 +88,7 @@ export function OverviewTab({ companyId }: OverviewTabProps): JSX.Element {
         </dl>
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Plan & subscription</h3>
         {companySubscriptions.length === 0 ? (
           <p className="mt-2 text-sm text-text-secondary">No subscription on file.</p>
@@ -133,7 +133,7 @@ export function OverviewTab({ companyId }: OverviewTabProps): JSX.Element {
         )}
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Primary contact</h3>
         {primaryUser ? (
           <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
@@ -149,11 +149,11 @@ export function OverviewTab({ companyId }: OverviewTabProps): JSX.Element {
             </div>
           </dl>
         ) : (
-          <p className="mt-2 text-sm text-text-secondary">No active client user found for this company.</p>
+          <p className="mt-2 text-sm text-text-secondary">No active company user found for this tenant.</p>
         )}
       </section>
 
-      <section className="rounded-lg border border-border-default bg-surface-page p-4">
+      <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Quick stats</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-md border border-border-default bg-surface-raised p-3">

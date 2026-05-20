@@ -5,6 +5,10 @@ import { Input } from '@/components/ui/input';
 import { OnboardingFormField } from '@/components/admin/onboarding/onboarding-form-field';
 import type { OnboardingStepProps } from '@/components/admin/onboarding/onboarding-step-props';
 import { buildOnboardingPlanPickRows } from '@/lib/plans/group-plans-for-onboarding';
+import {
+  onboardingPlanCellInteractiveClasses,
+  planCategoryHeadingClass,
+} from '@/lib/plans/onboarding-plan-cell-classes';
 import { usePlans } from '@/lib/hooks/use-plans';
 import { Niche } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils/format';
@@ -31,7 +35,12 @@ export function StepPlan({ state, onUpdate }: OnboardingStepProps): JSX.Element 
           <div className="space-y-6">
             {rows.map((row) => (
               <div key={row.category}>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                <p
+                  className={cn(
+                    'mb-2 text-xs font-semibold uppercase tracking-wide',
+                    planCategoryHeadingClass(row.category),
+                  )}
+                >
                   {row.categoryLabel}
                 </p>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -48,9 +57,11 @@ export function StepPlan({ state, onUpdate }: OnboardingStepProps): JSX.Element 
                         }}
                         className={cn(
                           'rounded-lg border p-3 text-left transition-colors',
-                          !cell.plan && 'cursor-not-allowed border-border-default bg-surface-raised opacity-60',
-                          cell.plan && !selected && 'border-border-default bg-surface-page hover:border-brand-500',
-                          selected && 'border-brand-500 bg-brand-50 ring-1 ring-brand-500',
+                          onboardingPlanCellInteractiveClasses(row.category, {
+                            disabled: !cell.plan,
+                            selected,
+                            hasPlan: Boolean(cell.plan),
+                          }),
                         )}
                       >
                         <p className="text-xs font-semibold text-text-secondary">{cell.tierLabel}</p>

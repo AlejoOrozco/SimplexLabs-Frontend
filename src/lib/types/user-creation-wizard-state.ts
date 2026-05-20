@@ -3,7 +3,7 @@ import type { UserCreationMode } from '@/lib/types/admin-provisioning';
 export type UserWizardUserType = UserCreationMode;
 
 export interface UserWizardState {
-  userType: UserWizardUserType | null;
+  userType: UserWizardUserType;
   companyId: string | null;
   companyName: string | null;
   credentials: {
@@ -20,11 +20,13 @@ export interface UserWizardState {
 /** @deprecated Use {@link UserWizardState} */
 export type UserCreationWizardState = UserWizardState;
 
-export const USER_WIZARD_STORAGE_KEY = 'simplex:admin:user-wizard:v2';
+export const USER_WIZARD_STORAGE_KEY = 'simplex:admin:user-wizard:v3';
 
-export function createInitialUserWizardState(): UserWizardState {
+export function createInitialUserWizardState(
+  userType: UserWizardUserType = 'staff',
+): UserWizardState {
   return {
-    userType: null,
+    userType,
     companyId: null,
     companyName: null,
     credentials: {
@@ -43,29 +45,34 @@ export function createInitialUserWizardState(): UserWizardState {
 export const createInitialUserCreationState = createInitialUserWizardState;
 
 export function maxStepForUserWizard(userType: UserWizardUserType): number {
-  return userType === 'client' ? 4 : 5;
+  return userType === 'client' ? 3 : 4;
+}
+
+/** Maps v2 step numbers (with removed type step) into v3. */
+export function normalizeUserWizardStep(userType: UserWizardUserType, step: number): number {
+  const max = maxStepForUserWizard(userType);
+  const legacyOffset = step >= 2 ? step - 1 : step;
+  return Math.min(Math.max(1, legacyOffset), max);
 }
 
 /** @deprecated Use {@link maxStepForUserWizard} */
 export const maxStepForUserCreationMode = maxStepForUserWizard;
 
 export function parseUserWizardUrl(searchParams: URLSearchParams): UserWizardState {
-  const base = createInitialUserWizardState();
   const modeParam = searchParams.get('mode');
+  const userType: UserWizardUserType = modeParam === 'client' ? 'client' : 'staff';
+  const base = createInitialUserWizardState(userType);
   const stepParam = searchParams.get('step');
   const companyIdParam = searchParams.get('companyId');
-  const userType: UserWizardUserType | null =
-    modeParam === 'client' || modeParam === 'staff' ? modeParam : companyIdParam ? 'client' : null;
   const stepParsed = stepParam ? Number.parseInt(stepParam, 10) : Number.NaN;
-  const step = Number.isFinite(stepParsed) && stepParsed >= 1 ? stepParsed : userType ? 2 : 1;
+  const step = Number.isFinite(stepParsed) && stepParsed >= 1 ? normalizeUserWizardStep(userType, stepParsed) : 1;
   const companyId = companyIdParam ?? null;
-  if (!userType) return base;
   return {
     ...base,
-    userType,
     step,
     companyId,
     companyName: null,
+    role: userType === 'client' ? 'COMPANY_ADMIN' : 'COMPANY_STAFF',
   };
 }
 
@@ -75,10 +82,11 @@ export function mergeUserWizardDraftWithUrl(draft: UserWizardState, searchParams
   if (urlHasDeepLink) {
     return {
       ...draft,
-      userType: url.userType ?? draft.userType,
+      userType: url.userType,
       companyId: url.companyId ?? draft.companyId,
       companyName: url.companyName ?? draft.companyName,
       step: url.step,
+      role: url.role,
       credentials: {
         ...draft.credentials,
         ...url.credentials,
@@ -94,7 +102,9 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 export function reviveUserWizardState(raw: unknown): UserWizardState | null {
   if (!isRecord(raw)) return null;
-  const base = createInitialUserWizardState();
+  const userType: UserWizardUserType =
+    raw.userType === 'client' || raw.userType === 'staff' ? raw.userType : 'staff';
+  const base = createInitialUserWizardState(userType);
   const cred = isRecord(raw.credentials) ? raw.credentials : {};
   const permRaw = Array.isArray(raw.permissionOverrides) ? raw.permissionOverrides : [];
   const permissionOverrides = permRaw
@@ -104,10 +114,15 @@ export function reviveUserWizardState(raw: unknown): UserWizardState | null {
       isGranted: Boolean(p.isGranted),
     }))
     .filter((p) => p.permissionKey.length > 0);
-  const userType =
-    raw.userType === 'client' || raw.userType === 'staff' ? (raw.userType as UserWizardUserType) : null;
-  const role = raw.role === 'COMPANY_ADMIN' || raw.role === 'COMPANY_STAFF' ? raw.role : 'COMPANY_STAFF';
-  const step = typeof raw.step === 'number' && raw.step >= 1 ? raw.step : base.step;
+  const role =
+    raw.role === 'COMPANY_ADMIN' || raw.role === 'COMPANY_STAFF'
+      ? raw.role
+      : userType === 'client'
+        ? 'COMPANY_ADMIN'
+        : 'COMPANY_STAFF';
+  const rawStep = typeof raw.step === 'number' && raw.step >= 1 ? raw.step : base.step;
+  const isLegacyDraft = raw.v !== 3;
+  const step = isLegacyDraft ? normalizeUserWizardStep(userType, rawStep) : Math.min(rawStep, maxStepForUserWizard(userType));
   return {
     userType,
     companyId: typeof raw.companyId === 'string' ? raw.companyId : null,
@@ -120,10 +135,10 @@ export function reviveUserWizardState(raw: unknown): UserWizardState | null {
     },
     role,
     permissionOverrides,
-    step,
+    step: Math.max(1, step),
   };
 }
 
 export function serializeUserWizardState(state: UserWizardState): unknown {
-  return { v: 2, ...state };
+  return { v: 3, ...state };
 }

@@ -73,7 +73,7 @@ export function AdminWebsiteRow({ website, onEditStart }: AdminWebsiteRowProps):
 
   return (
     <>
-      <div className="flex flex-wrap items-start gap-3 rounded-lg border border-border-default bg-surface-page p-3">
+      <div className="flex flex-wrap items-start gap-3 rounded-lg border border-border-default bg-surface-base p-3">
         <div className="h-[50px] w-[50px] shrink-0 overflow-hidden rounded-md border border-border-default bg-surface-overlay">
           {!thumbFailed ? (
             <Image

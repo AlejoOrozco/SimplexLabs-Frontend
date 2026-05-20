@@ -179,8 +179,9 @@ export function nicheLabel(niche: Niche): string {
   return NICHE_LABELS[niche];
 }
 
-export function sessionRoleLabel(role: SessionRoleName): string {
-  return SESSION_ROLE_LABELS[role];
+export function sessionRoleLabel(role: SessionRoleName | null | undefined): string {
+  if (!role) return '—';
+  return SESSION_ROLE_LABELS[role] ?? role;
 }
 
 export function productTypeLabel(type: ProductType): string {

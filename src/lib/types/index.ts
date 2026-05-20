@@ -165,6 +165,8 @@ export interface Company {
   whatsappPhoneNumber?: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Present on some admin list payloads so the UI can show the primary admin without an extra fetch. */
+  users?: User[];
 }
 
 export interface User {

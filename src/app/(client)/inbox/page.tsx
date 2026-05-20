@@ -19,11 +19,11 @@ export default function InboxPage(): JSX.Element {
   }
   if (query.isError) {
     return (
-      <div className="rounded-lg border border-error bg-error-light p-4">
+      <div className="rounded-lg border border-error bg-error-surface p-4">
         <p className="font-medium text-error-dark">Failed to load inbox.</p>
         <button
           type="button"
-          className="mt-3 rounded-md border border-border-default bg-surface-page px-3 py-1.5 text-sm"
+          className="mt-3 rounded-md border border-border-default bg-surface-base px-3 py-1.5 text-sm"
           onClick={() => void query.refetch()}
         >
           Retry
@@ -42,7 +42,6 @@ export default function InboxPage(): JSX.Element {
 
   return (
     <section className="space-y-2">
-      <h1 className="text-xl font-semibold">Inbox</h1>
       {rows.map((conversation) => (
         <ConversationRow key={conversation.id} conversation={conversation} />
       ))}

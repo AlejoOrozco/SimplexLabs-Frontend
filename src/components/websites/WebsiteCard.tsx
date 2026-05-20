@@ -37,7 +37,7 @@ export function WebsiteCard({ website }: WebsiteCardProps): JSX.Element {
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border-default bg-surface-page shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-border-default bg-surface-base shadow-sm">
       <div className="relative aspect-video w-full overflow-hidden bg-surface-overlay">
         {!screenshotFailed ? (
           <Image
@@ -60,14 +60,14 @@ export function WebsiteCard({ website }: WebsiteCardProps): JSX.Element {
             className={cn(
               'inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
               website.isActive
-                ? 'bg-success-light text-success-dark'
-                : 'bg-neutral-100 text-neutral-500',
+                ? 'bg-success-surface text-success-dark'
+                : 'bg-surface-overlay text-text-tertiary',
             )}
           >
             <span
               className={cn(
                 'h-1.5 w-1.5 rounded-full',
-                website.isActive ? 'bg-success' : 'bg-neutral-400',
+                website.isActive ? 'bg-success' : 'bg-text-tertiary',
               )}
             />
             {website.isActive ? 'Active' : 'Inactive'}

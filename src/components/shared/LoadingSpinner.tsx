@@ -17,7 +17,7 @@ export function LoadingSpinner({
       role="status"
       aria-live="polite"
       className={cn(
-        'flex items-center justify-center gap-2 text-sm text-gray-600',
+        'flex items-center justify-center gap-2 text-sm text-text-secondary',
         fullScreen ? 'min-h-screen w-full' : 'w-full py-8',
         className,
       )}

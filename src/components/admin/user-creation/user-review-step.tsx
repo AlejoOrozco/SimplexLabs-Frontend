@@ -21,11 +21,6 @@ export function UserReviewStep({ state, isSubmitting, onSubmit }: UserReviewStep
 
   const variables = useMemo(() => buildAdminCreateUserVariables(state), [state]);
 
-  const permissionSummary = useMemo(() => {
-    if (state.userType !== 'staff' || state.role !== 'COMPANY_STAFF') return [];
-    return state.permissionOverrides.filter((o) => o.isGranted).map((o) => o.permissionKey).slice(0, 8);
-  }, [state.userType, state.permissionOverrides, state.role]);
-
   return (
     <div className="space-y-6">
       <section className="rounded-lg border border-border-default bg-surface-raised p-4">
@@ -55,14 +50,12 @@ export function UserReviewStep({ state, isSubmitting, onSubmit }: UserReviewStep
         </dl>
       </section>
 
-      {permissionSummary.length > 0 ? (
+      {state.userType === 'staff' && state.role === 'COMPANY_STAFF' ? (
         <section className="rounded-lg border border-border-default bg-surface-raised p-4">
-          <h3 className="text-sm font-semibold text-text-primary">Key permissions enabled</h3>
-          <ul className="mt-2 list-inside list-disc text-sm text-text-secondary">
-            {permissionSummary.map((k) => (
-              <li key={k}>{k}</li>
-            ))}
-          </ul>
+          <h3 className="text-sm font-semibold text-text-primary">Permissions</h3>
+          <p className="mt-2 text-sm text-text-secondary">
+            Default company staff permissions will apply. Customize them after creation from the user profile.
+          </p>
         </section>
       ) : null}
 

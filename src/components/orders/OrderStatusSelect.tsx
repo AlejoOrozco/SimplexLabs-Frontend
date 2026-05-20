@@ -30,7 +30,7 @@ export function OrderStatusSelect({
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   if (allowed.length === 0) {
-    return <p className="text-sm text-gray-600">No further transitions allowed.</p>;
+    return <p className="text-sm text-text-secondary">No further transitions allowed.</p>;
   }
 
   const handleApply = async (): Promise<void> => {
@@ -51,7 +51,7 @@ export function OrderStatusSelect({
     <PermissionGate
       permission="company.orders.manage"
       fallback={
-        <p className="text-sm text-gray-600">You do not have permission to change order status.</p>
+        <p className="text-sm text-text-secondary">You do not have permission to change order status.</p>
       }
     >
       <div className="flex items-center gap-2">

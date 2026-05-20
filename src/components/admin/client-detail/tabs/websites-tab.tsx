@@ -27,7 +27,7 @@ export function WebsitesTab({ companyId }: WebsitesTabProps): JSX.Element {
 
   if (!hasWebsitePlan) {
     return (
-      <div className="rounded-lg border border-warning bg-warning-light px-4 py-3 text-sm text-warning-dark">
+      <div className="rounded-lg border border-warning bg-warning-surface px-4 py-3 text-sm text-warning-dark">
         This company does not have an active Website plan. Assign a Website plan before adding URLs.
       </div>
     );

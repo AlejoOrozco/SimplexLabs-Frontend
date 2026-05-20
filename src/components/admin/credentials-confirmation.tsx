@@ -62,7 +62,7 @@ export function CredentialsConfirmation({ result, doneHref = '/admin/companies' 
 
   return (
     <div className="space-y-6 text-center">
-      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-success-light">
+      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-success-surface">
         <CheckCircle className="size-8 text-success" aria-hidden />
       </div>
 
@@ -73,7 +73,7 @@ export function CredentialsConfirmation({ result, doneHref = '/admin/companies' 
         </p>
       </div>
 
-      <div className="rounded-xl border-2 border-warning bg-warning-light p-6 text-left">
+      <div className="rounded-xl border-2 border-warning bg-warning-surface p-6 text-left">
         <p className="mb-4 flex gap-2 text-sm font-semibold text-warning-dark">
           <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
           Share these credentials now — the password cannot be recovered after you leave this page
