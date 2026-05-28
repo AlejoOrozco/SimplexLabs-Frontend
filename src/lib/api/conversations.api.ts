@@ -3,7 +3,7 @@ import {
   getConversationMessages,
   listConversations,
 } from '@/features/conversations/api/conversations.api';
-import type { ConversationListItem } from '@/lib/api/endpoints';
+import type { ConversationDetail, ConversationListItem } from '@/lib/api/endpoints';
 import type { Channel } from '@/lib/types';
 
 /** @deprecated Prefer {@link ConversationListItem} from `@/lib/api/endpoints`. */
@@ -13,7 +13,7 @@ export async function getConversations(channel?: Channel): Promise<ConversationL
   return listConversations(channel ? { channel } : undefined);
 }
 
-export async function getConversation(id: string): Promise<ConversationListItem> {
+export async function getConversation(id: string): Promise<ConversationDetail> {
   return getConversationDetail(id);
 }
 

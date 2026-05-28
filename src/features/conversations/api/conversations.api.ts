@@ -18,6 +18,18 @@ export interface ListConversationsParams {
   offset?: number;
 }
 
+function toListQuery(
+  params?: ListConversationsParams,
+): Record<string, string | number | boolean | undefined> | undefined {
+  if (!params) return undefined;
+  return {
+    channel: params.channel,
+    status: params.status,
+    limit: params.limit,
+    offset: params.offset,
+  };
+}
+
 export async function listConversations(
   params?: ListConversationsParams,
 ): Promise<ConversationListItem[]> {
@@ -25,7 +37,7 @@ export async function listConversations(
     endpoints.conversations.list.path,
     {
       method: 'GET',
-      query: params,
+      query: toListQuery(params),
       isIdempotent: true,
     },
   );

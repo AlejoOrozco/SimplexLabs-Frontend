@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/shared/FormField';
 import { useAuth } from '@/context/auth-context';
 import { ApiClientError } from '@/lib/api/client';
+import { WHATSAPP_CREDENTIALS_SAVE_ENABLED } from '@/lib/constants/whatsapp-config';
 import { useUpdateCompany } from '@/lib/hooks/use-companies';
 import { editCompanyModalSchema, type EditCompanyModalFormValues, type UpdateCompanyDto } from '@/lib/schemas/company.schema';
 import type { Company } from '@/lib/types';
@@ -33,9 +34,10 @@ interface EditCompanyModalProps {
 }
 
 export function EditCompanyModal({ company, open, onClose }: EditCompanyModalProps): JSX.Element {
-  const { isSimplexAdmin, isSimplexStaff } = useAuth();
+  const { isSimplexAdmin } = useAuth();
   const updateCompany = useUpdateCompany(company.id);
-  const showWhatsappFields = isSimplexAdmin || isSimplexStaff;
+  const showWhatsappConfig = isSimplexAdmin;
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
 
   const form = useForm<EditCompanyModalFormValues>({
     resolver: zodResolver(editCompanyModalSchema),
@@ -48,11 +50,14 @@ export function EditCompanyModal({ company, open, onClose }: EditCompanyModalPro
       notificationEmail: company.notificationEmail ?? '',
       whatsappPhoneNumberId: company.whatsappPhoneNumberId ?? '',
       whatsappPhoneNumber: company.whatsappPhoneNumber ?? '',
+      dialogApiKey: '',
+      dialogBaseUrl: '',
     },
   });
 
   useEffect(() => {
     if (!open) return;
+    setWhatsappOpen(false);
     form.reset({
       name: company.name,
       phone: company.phone ?? '',
@@ -61,6 +66,8 @@ export function EditCompanyModal({ company, open, onClose }: EditCompanyModalPro
       notificationEmail: company.notificationEmail ?? '',
       whatsappPhoneNumberId: company.whatsappPhoneNumberId ?? '',
       whatsappPhoneNumber: company.whatsappPhoneNumber ?? '',
+      dialogApiKey: '',
+      dialogBaseUrl: '',
     });
   }, [open, company, form]);
 
@@ -77,14 +84,24 @@ export function EditCompanyModal({ company, open, onClose }: EditCompanyModalPro
             ? null
             : data.notificationEmail,
       };
-      if (showWhatsappFields) {
+      if (showWhatsappConfig) {
         base.whatsappPhoneNumberId =
           emptyToNull(data.whatsappPhoneNumberId as string | undefined) ?? data.whatsappPhoneNumberId;
         base.whatsappPhoneNumber =
           emptyToNull(data.whatsappPhoneNumber as string | undefined) ?? data.whatsappPhoneNumber;
+        if (WHATSAPP_CREDENTIALS_SAVE_ENABLED) {
+          const apiKey = data.dialogApiKey?.trim();
+          if (apiKey) base.dialogApiKey = apiKey;
+          const baseUrl = data.dialogBaseUrl?.trim();
+          if (baseUrl) base.dialogBaseUrl = baseUrl;
+        }
       }
       await updateCompany.mutateAsync(base);
-      notify.success('Company updated');
+      notify.success(
+        showWhatsappConfig && (data.whatsappPhoneNumber || data.whatsappPhoneNumberId)
+          ? 'WhatsApp settings updated'
+          : 'Company updated',
+      );
       onClose();
     } catch (err) {
       const message = err instanceof ApiClientError ? err.message : 'Could not update company';
@@ -128,19 +145,56 @@ export function EditCompanyModal({ company, open, onClose }: EditCompanyModalPro
             <Textarea {...form.register('address')} rows={2} />
           </FormField>
 
-          {showWhatsappFields ? (
-            <div className="space-y-3 rounded-lg border border-border-default p-4">
-              <p className="text-sm font-medium text-text-primary">WhatsApp Business</p>
-              <FormField
-                label="Phone Number ID"
-                error={form.formState.errors.whatsappPhoneNumberId?.message}
-              >
-                <Input {...form.register('whatsappPhoneNumberId')} placeholder="From Meta dashboard" />
-              </FormField>
-              <FormField label="Phone number" error={form.formState.errors.whatsappPhoneNumber?.message}>
-                <Input {...form.register('whatsappPhoneNumber')} type="tel" placeholder="+57…" />
-              </FormField>
-            </div>
+          {showWhatsappConfig ? (
+            <details
+              className="rounded-lg border border-border-default p-4"
+              open={whatsappOpen}
+              onToggle={(event) => setWhatsappOpen((event.target as HTMLDetailsElement).open)}
+            >
+              <summary className="cursor-pointer text-sm font-medium text-text-primary">
+                WhatsApp Configuration
+              </summary>
+              <div className="mt-4 space-y-3">
+                <FormField label="Phone number" error={form.formState.errors.whatsappPhoneNumber?.message}>
+                  <Input {...form.register('whatsappPhoneNumber')} type="tel" placeholder="+14155552671" />
+                </FormField>
+                <FormField
+                  label="Phone number ID"
+                  error={form.formState.errors.whatsappPhoneNumberId?.message}
+                >
+                  <Input
+                    {...form.register('whatsappPhoneNumberId')}
+                    placeholder='From provider dashboard; use "sandbox" for sandbox'
+                  />
+                </FormField>
+                {WHATSAPP_CREDENTIALS_SAVE_ENABLED ? (
+                  <>
+                    <FormField label="WhatsApp API Key">
+                      <Input
+                        {...form.register('dialogApiKey')}
+                        type="password"
+                        autoComplete="new-password"
+                        placeholder="Leave blank to keep unchanged"
+                      />
+                    </FormField>
+                    <FormField
+                      label="API base URL (optional)"
+                      error={form.formState.errors.dialogBaseUrl?.message}
+                    >
+                      <Input
+                        {...form.register('dialogBaseUrl')}
+                        placeholder="https://waba-sandbox.360dialog.io"
+                      />
+                    </FormField>
+                  </>
+                ) : (
+                  <p className="text-xs text-text-secondary">
+                    API key and base URL are not saved via the API yet. Use database seeding until the backend
+                    exposes these fields.
+                  </p>
+                )}
+              </div>
+            </details>
           ) : null}
 
           <div className="flex gap-3 pt-2">
