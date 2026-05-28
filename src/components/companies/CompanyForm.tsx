@@ -27,6 +27,7 @@ interface CompanyFormProps {
   onSubmit: (values: CreateCompanyDto) => Promise<void>;
   submitLabel?: string;
   onCancel?: () => void;
+  disabled?: boolean;
 }
 
 export function CompanyForm({
@@ -34,6 +35,7 @@ export function CompanyForm({
   onSubmit,
   submitLabel = 'Save',
   onCancel,
+  disabled = false,
 }: CompanyFormProps): JSX.Element {
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -66,7 +68,7 @@ export function CompanyForm({
     <form onSubmit={handleSubmit(submit)} noValidate className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="name">Name</Label>
-        <Input id="name" {...register('name')} />
+        <Input id="name" {...register('name')} disabled={disabled} />
         <FormError message={errors.name?.message} />
       </div>
 
@@ -76,7 +78,7 @@ export function CompanyForm({
           control={control}
           name="niche"
           render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
+            <Select value={field.value} onValueChange={field.onChange} disabled={disabled}>
               <SelectTrigger id="niche">
                 <SelectValue />
               </SelectTrigger>
@@ -95,13 +97,13 @@ export function CompanyForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" type="tel" {...register('phone')} />
+        <Input id="phone" type="tel" {...register('phone')} disabled={disabled} />
         <FormError message={errors.phone?.message} />
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="address">Address</Label>
-        <Textarea id="address" {...register('address')} />
+        <Textarea id="address" {...register('address')} disabled={disabled} />
         <FormError message={errors.address?.message} />
       </div>
 
@@ -109,11 +111,11 @@ export function CompanyForm({
 
       <div className="flex justify-end gap-2">
         {onCancel ? (
-          <Button type="button" variant="secondary" onClick={onCancel}>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={disabled}>
             Cancel
           </Button>
         ) : null}
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || disabled}>
           {isSubmitting ? 'Saving…' : submitLabel}
         </Button>
       </div>

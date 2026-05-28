@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/auth-context';
 import { ApiClientError } from '@/lib/api/client';
 import { isTenantTeamRole } from '@/lib/auth/session-role-utils';
 import { useCompany, useUpdateCompany } from '@/lib/hooks/use-companies';
@@ -19,6 +20,7 @@ interface SettingsTabProps {
 }
 
 export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
+  const { isSimplexAdmin } = useAuth();
   const companyQuery = useCompany(companyId);
   const updateCompany = useUpdateCompany(companyId);
   const usersQuery = useUsers();
@@ -36,6 +38,7 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
   }
 
   const company = companyQuery.data;
+  const companyIsInactive = Boolean(company.deactivatedAt);
 
   const handleCompanySave = async (values: CreateCompanyDto): Promise<void> => {
     try {
@@ -61,8 +64,12 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
             }}
             onSubmit={handleCompanySave}
             submitLabel={updateCompany.isPending ? 'Saving…' : 'Save company'}
+            disabled={companyIsInactive}
           />
         </div>
+        {companyIsInactive ? (
+          <p className="mt-3 text-xs text-text-secondary">Company is inactive. Editing is disabled.</p>
+        ) : null}
       </section>
 
       <section className="rounded-lg border border-border-default bg-surface-base p-4">
@@ -122,10 +129,12 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
 
       <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Account</h3>
-        {primaryUser ? (
+        {primaryUser && isSimplexAdmin ? (
           <ClientAccountActions user={primaryUser} />
         ) : (
-          <p className="mt-2 text-sm text-text-secondary">No company user to deactivate.</p>
+          <p className="mt-2 text-sm text-text-secondary">
+            {isSimplexAdmin ? 'No company user to deactivate.' : 'Only super admins can deactivate users.'}
+          </p>
         )}
       </section>
     </div>

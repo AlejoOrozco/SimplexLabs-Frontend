@@ -159,6 +159,8 @@ export interface Company {
   niche: Niche;
   phone: string | null;
   address: string | null;
+  deactivatedAt?: string | null;
+  deactivationReason?: string | null;
   notificationPhone?: string | null;
   notificationEmail?: string | null;
   whatsappPhoneNumberId?: string | null;

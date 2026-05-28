@@ -6,9 +6,10 @@ import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
 import { adminSendUserCredentialsEmail } from '@/lib/api/admin-user-creation.api';
-import { updateUser } from '@/lib/api/users.api';
+import { useAuth } from '@/context/auth-context';
 import { queryKeys } from '@/lib/hooks/query-keys';
-import { useUsersByCompany } from '@/lib/hooks/use-users';
+import { useCompany } from '@/lib/hooks/use-companies';
+import { useDeleteUser, useUsersByCompany } from '@/lib/hooks/use-users';
 import { notify } from '@/lib/toast';
 import type { User } from '@/lib/types';
 import { fullName, sessionRoleLabel } from '@/lib/utils/format';
@@ -43,23 +44,32 @@ function sortTenantUsers(rows: readonly User[]): User[] {
 }
 
 export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element {
+  const { isSimplexAdmin } = useAuth();
   const qc = useQueryClient();
+  const companyQuery = useCompany(companyId);
   const usersQuery = useUsersByCompany(companyId);
   const [confirmUser, setConfirmUser] = useState<User | null>(null);
-  const [confirmMode, setConfirmMode] = useState<'deactivate' | 'reactivate'>('deactivate');
 
-  const setActiveMutation = useMutation({
-    mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
-      return updateUser(userId, { isActive });
-    },
+  const deleteUserMutation = useDeleteUser();
+  const companyIsInactive = Boolean(companyQuery.data?.deactivatedAt);
+
+  const deleteUserActionMutation = useMutation({
+    mutationFn: async (userId: string) => deleteUserMutation.mutateAsync(userId),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.users.all });
       void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
-      notify.success('User updated');
+      notify.success('User deactivated');
       setConfirmUser(null);
     },
     onError: (err) => {
-      const message = err instanceof ApiClientError ? err.message : 'Could not update user';
+      if (err instanceof ApiClientError && err.status === 404) {
+        void qc.invalidateQueries({ queryKey: queryKeys.users.all });
+        void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
+        notify.info('Already deleted or not found');
+        setConfirmUser(null);
+        return;
+      }
+      const message = err instanceof ApiClientError ? err.message : 'Could not deactivate user';
       notify.error(message);
     },
   });
@@ -91,8 +101,11 @@ export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element 
   return (
     <div className="space-y-4">
       <p className="text-sm text-text-secondary">
-        Tenant users with login access. Use the menu to deactivate accounts, open permissions, or email a fresh password.
+        Tenant users with login access. Use the menu to deactivate user accounts, open permissions, or email a fresh password.
       </p>
+      {companyIsInactive ? (
+        <p className="text-xs text-text-secondary">Company is inactive. Team edits are disabled.</p>
+      ) : null}
 
       <div className="rounded-lg border border-border-default bg-surface-base">
         <Table>
@@ -133,30 +146,19 @@ export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element 
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {user.isActive ? (
+                        {isSimplexAdmin ? (
                           <DropdownMenuItem
-                            onSelect={() => {
-                              setConfirmMode('deactivate');
-                              setConfirmUser(user);
-                            }}
+                            disabled={companyIsInactive || deleteUserActionMutation.isPending}
+                            onSelect={() => setConfirmUser(user)}
                           >
-                            Deactivate account
+                            Delete user
                           </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem
-                            onSelect={() => {
-                              setConfirmMode('reactivate');
-                              setConfirmUser(user);
-                            }}
-                          >
-                            Reactivate account
-                          </DropdownMenuItem>
-                        )}
+                        ) : null}
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/users/${user.id}/permissions`}>View permissions</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          disabled={sendCredentialsMutation.isPending}
+                          disabled={sendCredentialsMutation.isPending || companyIsInactive}
                           onSelect={() => {
                             sendCredentialsMutation.mutate(user.id);
                           }}
@@ -176,14 +178,10 @@ export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element 
       <Dialog open={confirmUser !== null} onOpenChange={(open) => !open && setConfirmUser(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{confirmMode === 'deactivate' ? 'Deactivate account' : 'Reactivate account'}</DialogTitle>
+            <DialogTitle>Deactivate user account</DialogTitle>
             <DialogDescription>
               {confirmUser ? (
-                <>
-                  {confirmMode === 'deactivate'
-                    ? `${fullName(confirmUser)} will no longer be able to sign in until reactivated.`
-                    : `${fullName(confirmUser)} will be able to sign in again.`}
-                </>
+                <>This will deactivate the user account.</>
               ) : null}
             </DialogDescription>
           </DialogHeader>
@@ -193,17 +191,14 @@ export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element 
             </Button>
             <Button
               type="button"
-              variant={confirmMode === 'deactivate' ? 'destructive' : 'default'}
-              disabled={!confirmUser || setActiveMutation.isPending}
+              variant="destructive"
+              disabled={!confirmUser || deleteUserActionMutation.isPending}
               onClick={() => {
                 if (!confirmUser) return;
-                setActiveMutation.mutate({
-                  userId: confirmUser.id,
-                  isActive: confirmMode === 'reactivate',
-                });
+                deleteUserActionMutation.mutate(confirmUser.id);
               }}
             >
-              {setActiveMutation.isPending ? 'Saving…' : confirmMode === 'deactivate' ? 'Deactivate' : 'Reactivate'}
+              {deleteUserActionMutation.isPending ? 'Saving…' : 'Deactivate user'}
             </Button>
           </DialogFooter>
         </DialogContent>
