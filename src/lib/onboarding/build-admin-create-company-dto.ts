@@ -6,6 +6,7 @@ import type {
 import { PlanFeatureType } from '@/lib/types';
 import type { PaymentMethod } from '@/lib/types/onboarding';
 import { PaymentMethod as PaymentMethodEnum } from '@/lib/types/onboarding';
+import { WHATSAPP_CREDENTIALS_SAVE_ENABLED } from '@/lib/constants/whatsapp-config';
 
 function trimOrUndefined(value: string): string | undefined {
   const t = value.trim();
@@ -31,6 +32,12 @@ export function buildAdminCreateCompanyDto(state: CompanyWizardState): AdminCrea
     notificationEmail: trimOrUndefined(info.notificationEmail),
     whatsappPhoneNumberId: trimOrUndefined(whatsapp.phoneNumberId),
     whatsappPhoneNumber: trimOrUndefined(whatsapp.phoneNumber),
+    ...(WHATSAPP_CREDENTIALS_SAVE_ENABLED
+      ? {
+          dialogApiKey: trimOrUndefined(whatsapp.apiKey),
+          dialogBaseUrl: trimOrUndefined(whatsapp.baseUrl),
+        }
+      : {}),
     plans: plans.map((p) => ({
       planId: p.planId,
       billingCycle: p.billingCycle,

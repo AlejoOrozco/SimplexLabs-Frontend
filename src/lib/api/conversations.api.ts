@@ -1,16 +1,20 @@
-import { apiGet } from '@/lib/api/client';
-import type { Channel, Conversation, Message } from '@/lib/types';
+import {
+  getConversation as getConversationDetail,
+  getConversationMessages,
+  listConversations,
+} from '@/features/conversations/api/conversations.api';
+import type { ConversationListItem } from '@/lib/api/endpoints';
+import type { Channel } from '@/lib/types';
 
-export async function getConversations(channel?: Channel): Promise<Conversation[]> {
-  return apiGet<Conversation[]>('/conversations', {
-    params: channel ? { channel } : undefined,
-  });
+/** @deprecated Prefer {@link ConversationListItem} from `@/lib/api/endpoints`. */
+export type Conversation = ConversationListItem;
+
+export async function getConversations(channel?: Channel): Promise<ConversationListItem[]> {
+  return listConversations(channel ? { channel } : undefined);
 }
 
-export async function getConversation(id: string): Promise<Conversation> {
-  return apiGet<Conversation>(`/conversations/${id}`);
+export async function getConversation(id: string): Promise<ConversationListItem> {
+  return getConversationDetail(id);
 }
 
-export async function getMessages(id: string): Promise<Message[]> {
-  return apiGet<Message[]>(`/conversations/${id}/messages`);
-}
+export { getConversationMessages as getMessages };

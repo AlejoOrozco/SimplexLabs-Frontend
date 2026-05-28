@@ -75,6 +75,8 @@ export interface AdminCreateCompanyDto {
   notificationEmail?: string;
   whatsappPhoneNumberId?: string;
   whatsappPhoneNumber?: string;
+  dialogApiKey?: string;
+  dialogBaseUrl?: string;
   plans: AdminCreateCompanyPlanDto[];
   agentConfig?: AdminCreateCompanyAgentConfigDto;
 }

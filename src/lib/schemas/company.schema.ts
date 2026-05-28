@@ -26,6 +26,8 @@ export const editCompanyModalSchema = z.object({
   notificationEmail: z.union([z.string().email().max(254), z.literal(''), z.null()]).optional(),
   whatsappPhoneNumberId: z.string().max(120).nullish(),
   whatsappPhoneNumber: z.string().max(30).nullish(),
+  dialogApiKey: z.string().max(500).optional(),
+  dialogBaseUrl: z.string().url().max(500).or(z.literal('')).optional(),
 });
 
 export type EditCompanyModalFormValues = z.infer<typeof editCompanyModalSchema>;

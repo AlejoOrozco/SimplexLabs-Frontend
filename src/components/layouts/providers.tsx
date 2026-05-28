@@ -9,6 +9,7 @@ import { ModalProvider } from '@/context/modal-context';
 import { shouldIgnoreSpuriousSessionExpiredLogout } from '@/lib/auth/auth-failure-suppression';
 import { POST_LOGIN_REDIRECT_KEY } from '@/lib/auth/post-login-redirect';
 import { eventBus } from '@/lib/realtime/event-bus';
+import { ConversationsRealtimeBridge } from '@/components/realtime/conversations-realtime-bridge';
 import { getSocket } from '@/lib/realtime/socket';
 import { notify } from '@/lib/toast';
 
@@ -88,6 +89,7 @@ export function AppProviders({ children }: { children: ReactNode }): JSX.Element
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SessionExpiredCoordinator />
+        <ConversationsRealtimeBridge />
         <ModalProvider>
           {children}
           <AccountDeactivatedModalRoot />

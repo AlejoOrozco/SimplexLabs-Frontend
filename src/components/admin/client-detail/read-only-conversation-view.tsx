@@ -7,6 +7,7 @@ import { SkeletonCard } from '@/components/shared/Skeleton';
 import { AgentRunInspector } from '@/features/conversations/components/agent-run-inspector';
 import { MessageBubble } from '@/features/conversations/components/message-bubble';
 import { useConversationThread } from '@/features/conversations/hooks/use-conversation-thread';
+import { getConversationStatusLabel } from '@/features/conversations/utils/conversation-display';
 import { adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
 
 interface ReadOnlyConversationViewProps {
@@ -47,7 +48,7 @@ export function ReadOnlyConversationView({
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
       <PageMeta
         title="Conversation thread"
-        description={`Status: ${conversationQuery.data.lifecycleStatus}`}
+        description={`Status: ${getConversationStatusLabel(conversationQuery.data)}`}
       />
       <div className="space-y-4">
         <div className="rounded-lg border border-border-focus bg-surface-raised px-4 py-3 text-sm text-text-primary shadow-brand">

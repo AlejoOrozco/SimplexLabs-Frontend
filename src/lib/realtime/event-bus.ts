@@ -1,9 +1,12 @@
+import type { ConversationRealtimeEvent } from '@/lib/realtime/conversation-events';
+
 type EventMap = {
   'session:expired': { reason: string };
   'auth:forbidden': undefined;
   'socket:connected': undefined;
   'socket:disconnected': undefined;
   'socket:reconnected': undefined;
+  'conversation:realtime': ConversationRealtimeEvent;
 };
 
 type EventKey = keyof EventMap;

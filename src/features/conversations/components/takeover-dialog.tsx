@@ -9,8 +9,11 @@ export function TakeoverDialog({ conversationId }: { conversationId: string }): 
 
   return (
     <div className="rounded-lg border p-3">
+      <p className="mb-2 text-sm text-slate-600">
+        Take control to reply manually on WhatsApp. The AI agent will pause until you hand back.
+      </p>
       <label className="mb-2 block text-sm font-medium" htmlFor="takeover-reason">
-        Takeover reason (optional)
+        Reason (optional)
       </label>
       <textarea
         id="takeover-reason"
@@ -25,7 +28,7 @@ export function TakeoverDialog({ conversationId }: { conversationId: string }): 
         onClick={() => takeover.mutate(reason || undefined)}
         type="button"
       >
-        {takeover.isPending ? 'Taking over...' : 'Take over'}
+        {takeover.isPending ? 'Taking control…' : 'Take control'}
       </button>
     </div>
   );

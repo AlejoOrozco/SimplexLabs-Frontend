@@ -141,7 +141,10 @@ export default function DashboardPage(): JSX.Element {
 
     const openConversations = stats
       ? stats.openConversations
-      : conversations.filter((conversation) => conversation.status !== 'CLOSED').length;
+      : conversations.filter((conversation) => {
+          const status = conversation.status ?? conversation.lifecycleStatus;
+          return status !== 'CLOSED';
+        }).length;
 
     const recentConversations = [...conversations]
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())

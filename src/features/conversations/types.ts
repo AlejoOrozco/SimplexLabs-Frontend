@@ -1,4 +1,13 @@
-import type { Conversation, Message } from '@/lib/api/endpoints';
+export type {
+  Channel,
+  ControlMode,
+  ConversationControlResponse,
+  ConversationDetail,
+  ConversationListItem,
+  ConvoStatus,
+  LastMessagePreview,
+  Message,
+  SenderType,
+} from '@/lib/api/endpoints';
 
-export type ConversationListItem = Conversation;
-export type ConversationThreadMessage = Message;
+export type ConversationThreadMessage = import('@/lib/api/endpoints').Message;

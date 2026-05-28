@@ -26,24 +26,43 @@ const sessionSchema = z.object({
   companyId: z.string().uuid().nullable(),
 });
 
+const convoStatusSchema = z.enum(['OPEN', 'CLOSED', 'PENDING']);
+
 const contactSchema = z.object({
   id: z.string().uuid(),
   firstName: z.string(),
   lastName: z.string(),
   phone: z.string().nullable(),
+  email: z.string().nullable().optional(),
 });
 
-const conversationSchema = z.object({
+const lastMessagePreviewSchema = z.object({
+  content: z.string(),
+  sentAt: z.string(),
+  senderType: senderTypeSchema,
+});
+
+const conversationListItemSchema = z.object({
   id: z.string().uuid(),
   companyId: z.string().uuid(),
+  contactId: z.string().uuid(),
   channel: channelSchema,
-  lifecycleStatus: z.string(),
+  status: convoStatusSchema.optional(),
+  lifecycleStatus: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  contact: contactSchema,
+  lastMessage: lastMessagePreviewSchema.nullable(),
+  unreadCount: z.number().int().min(0),
+  controlMode: controlModeSchema.optional(),
+});
+
+const conversationDetailSchema = conversationListItemSchema.extend({
   controlMode: controlModeSchema,
   controlledByUserId: z.string().uuid().nullable(),
-  updatedAt: z.string(),
-  lastCustomerMessageAt: z.string().nullable(),
+  controlModeChangedAt: z.string().nullable().optional(),
+  lastCustomerMessageAt: z.string().nullable().optional(),
   lastReadAtByOperator: z.string().nullable().optional(),
-  contact: contactSchema,
 });
 
 const messageSchema = z.object({
@@ -135,21 +154,27 @@ export const endpoints = {
     list: endpoint({
       path: '/conversations',
       method: 'GET',
-      query: listQuerySchema.extend({
-        lifecycleStatus: z.array(z.string()).optional(),
-        channel: channelSchema.optional(),
-        controlMode: controlModeSchema.optional(),
-        unread: z.boolean().optional(),
-        updatedSince: z.string().optional(),
-      }),
-      response: paginatedResponseSchema(conversationSchema),
+      query: listQuerySchema
+        .partial()
+        .extend({
+          channel: channelSchema.optional(),
+          status: convoStatusSchema.optional(),
+          lifecycleStatus: z.array(z.string()).optional(),
+          controlMode: controlModeSchema.optional(),
+          unread: z.boolean().optional(),
+          updatedSince: z.string().optional(),
+        }),
+      response: z.union([
+        paginatedResponseSchema(conversationListItemSchema),
+        z.array(conversationListItemSchema),
+      ]),
       isIdempotent: true,
     }),
     getById: endpoint({
       path: '/conversations/:id',
       method: 'GET',
       pathParams: z.object({ id: z.string().uuid() }),
-      response: conversationSchema,
+      response: conversationDetailSchema,
       isIdempotent: true,
     }),
     messages: endpoint({
@@ -157,7 +182,7 @@ export const endpoints = {
       method: 'GET',
       pathParams: z.object({ id: z.string().uuid() }),
       query: listQuerySchema.extend({ since: z.string().optional() }),
-      response: paginatedResponseSchema(messageSchema),
+      response: z.union([paginatedResponseSchema(messageSchema), z.array(messageSchema)]),
       isIdempotent: true,
     }),
     sendMessage: endpoint({
@@ -287,7 +312,18 @@ export const apiSuccessEnvelopeSchema = <T extends z.ZodTypeAny>(schema: T) =>
   });
 
 export type Session = z.infer<typeof sessionSchema>;
-export type Conversation = z.infer<typeof conversationSchema>;
+export type ConversationListItem = z.infer<typeof conversationListItemSchema>;
+export type ConversationDetail = z.infer<typeof conversationDetailSchema>;
+/** @deprecated Use {@link ConversationListItem} or {@link ConversationDetail}. */
+export type Conversation = ConversationDetail;
+export type LastMessagePreview = z.infer<typeof lastMessagePreviewSchema>;
+export type ConvoStatus = z.infer<typeof convoStatusSchema>;
+export type Channel = z.infer<typeof channelSchema>;
+export type SenderType = z.infer<typeof senderTypeSchema>;
+export type ControlMode = z.infer<typeof controlModeSchema>;
+export type ConversationControlResponse = z.infer<
+  (typeof endpoints.conversations.takeover)['response']
+>;
 export type Message = z.infer<typeof messageSchema>;
 export type Appointment = z.infer<typeof appointmentSchema>;
 export type Payment = z.infer<typeof paymentSchema>;

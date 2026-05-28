@@ -37,6 +37,8 @@ export interface CompanyWizardState {
   whatsapp: {
     phoneNumberId: string;
     phoneNumber: string;
+    apiKey: string;
+    baseUrl: string;
     skip: boolean;
   };
   /** Optional website rows when a Website-category plan is selected. */
@@ -75,6 +77,8 @@ export function createInitialCompanyWizardState(): CompanyWizardState {
     whatsapp: {
       phoneNumberId: '',
       phoneNumber: '',
+      apiKey: '',
+      baseUrl: '',
       skip: true,
     },
     websites: [],
@@ -217,6 +221,8 @@ export function reviveCompanyWizardState(raw: unknown): CompanyWizardState | nul
     whatsapp: {
       phoneNumberId,
       phoneNumber,
+      apiKey: typeof wa.apiKey === 'string' ? wa.apiKey : '',
+      baseUrl: typeof wa.baseUrl === 'string' ? wa.baseUrl : '',
       skip: typeof wa.skip === 'boolean' ? wa.skip : true,
     },
     websites,

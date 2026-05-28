@@ -1,12 +1,16 @@
 'use client';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getConversations } from '@/features/conversations/api/conversations.api';
+import {
+  listConversations,
+  type ListConversationsParams,
+} from '@/features/conversations/api/conversations.api';
+import { queryKeys } from '@/lib/hooks/query-keys';
 
-export function useConversationList() {
+export function useConversationList(params?: ListConversationsParams) {
   return useInfiniteQuery({
-    queryKey: ['conversations', 'list'],
-    queryFn: () => getConversations(),
+    queryKey: [...queryKeys.conversations.list(params?.channel), params?.status ?? 'all'],
+    queryFn: () => listConversations(params),
     initialPageParam: 0,
     getNextPageParam: () => undefined,
   });
