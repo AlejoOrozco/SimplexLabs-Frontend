@@ -8,16 +8,23 @@ export interface MeProfilePreview {
   name: string | null;
   email: string | null;
   companyId: string | null;
+  companyName: string | null;
 }
 
 export function getMeProfilePreview(payload: unknown): MeProfilePreview {
   if (!payload || typeof payload !== 'object') {
-    return { name: null, email: null, companyId: null };
+    return { name: null, email: null, companyId: null, companyName: null };
   }
 
   const root = payload as Record<string, unknown>;
   const nestedUser =
     root.user && typeof root.user === 'object' ? (root.user as Record<string, unknown>) : null;
+  const nestedCompany =
+    root.company && typeof root.company === 'object'
+      ? (root.company as Record<string, unknown>)
+      : nestedUser?.company && typeof nestedUser.company === 'object'
+        ? (nestedUser.company as Record<string, unknown>)
+        : null;
 
   const firstName =
     readNonEmptyString(root.firstName) ??
@@ -36,6 +43,8 @@ export function getMeProfilePreview(payload: unknown): MeProfilePreview {
       readNonEmptyString(root.companyId) ??
       readNonEmptyString(root.company_id) ??
       readNonEmptyString(nestedUser?.companyId) ??
-      readNonEmptyString(nestedUser?.company_id),
+      readNonEmptyString(nestedUser?.company_id) ??
+      readNonEmptyString(nestedCompany?.id),
+    companyName: readNonEmptyString(nestedCompany?.name),
   };
 }

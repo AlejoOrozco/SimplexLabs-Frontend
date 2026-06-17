@@ -8,6 +8,10 @@ import {
   type ConversationRealtimePayload,
   type MessageCreatedPayload,
 } from '@/lib/realtime/conversation-events';
+import {
+  notifyAuthDeactivated,
+  parseAuthDeactivatedPayload,
+} from '@/lib/auth/account-deactivation';
 import { eventBus } from '@/lib/realtime/event-bus';
 import { logger } from '@/lib/logger';
 
@@ -111,6 +115,11 @@ export function getSocket(): Socket {
 
   socket.on('disconnect', () => {
     eventBus.emit('socket:disconnected', undefined);
+  });
+
+  socket.on('auth_error', (payload: unknown) => {
+    const detail = parseAuthDeactivatedPayload(payload);
+    if (detail) notifyAuthDeactivated(detail);
   });
 
   socket.onAny((eventName, payload) => {

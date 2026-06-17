@@ -19,7 +19,7 @@ import { getMe } from '@/lib/api/auth.api';
 import { getAdminDashboardStats, getAdminSubscriptionBillingOverview } from '@/lib/api/admin-dashboard.api';
 import { getPayments } from '@/lib/api/payments.api';
 import { getAppointments } from '@/lib/api/appointments.api';
-import { getCompanies } from '@/lib/api/companies.api';
+import { getAdminCompanies } from '@/lib/api/admin-companies.api';
 import { getOrders } from '@/lib/api/orders.api';
 import { getSubscriptions } from '@/lib/api/subscriptions.api';
 import { useAdminAgentFailureCount } from '@/lib/hooks/use-admin-agent-failures';
@@ -39,7 +39,10 @@ export function AdminPlatformDashboard(): JSX.Element {
     queryKey: ['auth', 'me'],
     queryFn: getMe,
   });
-  const companiesQuery = useQuery({ queryKey: queryKeys.companies.list(), queryFn: getCompanies });
+  const companiesQuery = useQuery({
+    queryKey: queryKeys.admin.companies.list(),
+    queryFn: getAdminCompanies,
+  });
   const subscriptionsQuery = useQuery({
     queryKey: queryKeys.subscriptions.list(),
     queryFn: getSubscriptions,
@@ -155,7 +158,11 @@ export function AdminPlatformDashboard(): JSX.Element {
             Active companies
           </div>
           <p className="mt-3 text-3xl font-semibold tabular-nums">{activeCompaniesDisplay}</p>
-          <p className="mt-1 text-xs text-text-secondary">Companies with an active subscription</p>
+          <p className="mt-1 text-xs text-text-secondary">
+            {adminStats?.inactiveCompanies !== undefined
+              ? `${adminStats.inactiveCompanies} inactive · companies with is_active = true`
+              : 'Companies with is_active = true'}
+          </p>
         </div>
         <div className="rounded-lg border border-border-default bg-surface-base p-4">
           <div className="flex items-center gap-2 text-sm text-text-secondary">

@@ -13,7 +13,10 @@ export const createAppointmentSchema = z.object({
   meetingUrl: z.string().url().nullish(),
   externalAttendeeName: z.string().max(100).nullish(),
   externalAttendeeEmail: z.string().email().nullish(),
-  attendeeUserIds: z.array(z.string().min(1)).optional(),
+  /** Required on POST /appointments when the operator is SUPER_ADMIN (tenant from picker or workspace). */
+  companyId: z.string().uuid().optional(),
+  attendeeUserIds: z.array(z.string().uuid()).optional(),
+  attendeeContactIds: z.array(z.string().cuid()).optional(),
 });
 
 export const updateAppointmentSchema = createAppointmentSchema.partial();

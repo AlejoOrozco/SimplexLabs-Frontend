@@ -8,9 +8,9 @@ import axios, {
 import { endpoints, apiSuccessEnvelopeSchema } from '@/lib/api/endpoints';
 import { ApiError, normalizeApiError } from '@/lib/api/errors';
 import {
-  AccountDeactivatedError,
-  notifyAccountDeactivated,
-  parseAccountDeactivatedPayload,
+  AuthDeactivatedError,
+  notifyAuthDeactivated,
+  parseAuthDeactivatedPayload,
 } from '@/lib/auth/account-deactivation';
 import { eventBus } from '@/lib/realtime/event-bus';
 import type { ApiResponse } from '@/lib/types';
@@ -79,10 +79,10 @@ async function executeFetch<T>(url: string, options: ApiFetchOptions, correlatio
 
   const errorJson: unknown = await response.json().catch(() => undefined);
   if (response.status === 401) {
-    const deactivated = parseAccountDeactivatedPayload(errorJson);
+    const deactivated = parseAuthDeactivatedPayload(errorJson);
     if (deactivated) {
-      notifyAccountDeactivated(deactivated);
-      throw new AccountDeactivatedError(deactivated);
+      notifyAuthDeactivated(deactivated);
+      throw new AuthDeactivatedError(deactivated);
     }
   }
   throw normalizeApiError(errorJson, response.headers.get('retry-after'));
@@ -95,7 +95,7 @@ async function maybeRefresh(): Promise<boolean> {
     await executeFetch(refreshUrl, { method: 'POST' }, correlationId);
     return true;
   } catch (error) {
-    if (error instanceof AccountDeactivatedError) throw error;
+    if (error instanceof AuthDeactivatedError) throw error;
     return false;
   }
 }
@@ -112,7 +112,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     try {
       return await executeFetch<T>(url, options, correlationId);
     } catch (error) {
-      if (error instanceof AccountDeactivatedError) throw error;
+      if (error instanceof AuthDeactivatedError) throw error;
       if (!(error instanceof ApiError)) throw error;
       if (error.statusCode === 403) {
         eventBus.emit('auth:forbidden', undefined);
@@ -254,14 +254,14 @@ function createApiClient(): AxiosInstance {
       }
 
       if (isUnauthorized) {
-        const deactivated = parseAccountDeactivatedPayload(error.response?.data);
+        const deactivated = parseAuthDeactivatedPayload(error.response?.data);
         if (deactivated) {
-          notifyAccountDeactivated(deactivated);
+          notifyAuthDeactivated(deactivated);
           const details = extractErrorMessage(error);
           throw new ApiClientError(
             deactivated.message ?? details.message,
             401,
-            'ACCOUNT_DEACTIVATED',
+            deactivated.code,
             deactivated,
           );
         }
@@ -275,7 +275,7 @@ function createApiClient(): AxiosInstance {
         } catch (refreshError) {
           if (
             refreshError instanceof ApiClientError &&
-            refreshError.code === 'ACCOUNT_DEACTIVATED'
+            (refreshError.code === 'ACCOUNT_DEACTIVATED' || refreshError.code === 'COMPANY_DEACTIVATED')
           ) {
             throw refreshError;
           }

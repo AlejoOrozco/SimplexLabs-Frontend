@@ -15,6 +15,7 @@ export interface AdminBillingOverview {
 
 export interface AdminDashboardStats {
   activeCompanies: number;
+  inactiveCompanies?: number;
   totalUsers: number;
   appointmentsThisWeek: number;
 }

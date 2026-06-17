@@ -18,11 +18,12 @@ function readStringArray(value: unknown): string[] {
 }
 
 function parseRoleName(record: Record<string, unknown>): SessionRoleName {
-  return (
-    parseSessionRoleName(record.roleName) ??
-    parseSessionRoleName(record.role) ??
-    'CLIENT'
-  );
+  const role =
+    parseSessionRoleName(record.roleName) ?? parseSessionRoleName(record.role);
+  if (!role) {
+    throw new Error('Authenticated user payload is missing a valid roleName');
+  }
+  return role;
 }
 
 function parseCompany(value: unknown): AuthSessionCompany | null {

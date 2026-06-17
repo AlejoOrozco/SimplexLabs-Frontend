@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { SimplexAppointmentActions } from '@/components/appointments/simplex-appointment-actions';
+import { AppointmentInvitationActions } from '@/components/appointments/appointment-invitation-actions';
 import type { Appointment } from '@/lib/types';
 import { AppointmentType } from '@/lib/types';
 import {
@@ -89,6 +90,13 @@ export function AppointmentDetailModal({
                   <p className="mt-0.5 text-text-primary">
                     {appointmentConfirmationLabel(getEffectiveAppointmentConfirmationStatus(appointment))}
                   </p>
+                </div>
+              ) : null}
+              {appointment.viewerRole === 'invitee' ||
+              appointment.invitationPending ||
+              appointment.invitationStatus ? (
+                <div className="border-t border-border-default pt-4">
+                  <AppointmentInvitationActions appointment={appointment} />
                 </div>
               ) : null}
               {appointment.type === AppointmentType.SIMPLEX_WITH_CLIENT ? (

@@ -4,16 +4,21 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { OnboardingFormField } from '@/components/admin/onboarding/onboarding-form-field';
-import type { Company } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 
 const RETURN_TO = encodeURIComponent('/admin/onboarding?mode=client');
 
+export interface CompanyPickerOption {
+  id: string;
+  name: string;
+  niche?: string;
+}
+
 interface UserClientCompanyStepProps {
-  companies: readonly Company[];
+  companies: readonly CompanyPickerOption[];
   selectedCompanyId: string | null;
   initialSearch: string;
-  onSelectCompany: (company: Company) => void;
+  onSelectCompany: (company: CompanyPickerOption) => void;
 }
 
 export function UserClientCompanyStep({
@@ -64,7 +69,7 @@ export function UserClientCompanyStep({
                   )}
                 >
                   <span className="font-medium text-text-primary">{c.name}</span>
-                  <span className="text-xs text-text-secondary">{c.niche}</span>
+                  {c.niche ? <span className="text-xs text-text-secondary">{c.niche}</span> : null}
                 </button>
               </li>
             ))

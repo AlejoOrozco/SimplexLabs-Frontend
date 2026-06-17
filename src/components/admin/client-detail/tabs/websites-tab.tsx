@@ -11,9 +11,10 @@ import { companyHasActiveWebsitePlan } from '@/lib/websites/company-has-active-w
 
 interface WebsitesTabProps {
   companyId: string;
+  companyIsInactive?: boolean;
 }
 
-export function WebsitesTab({ companyId }: WebsitesTabProps): JSX.Element {
+export function WebsitesTab({ companyId, companyIsInactive = false }: WebsitesTabProps): JSX.Element {
   const subscriptionsQuery = useSubscriptions();
   const websitesQuery = useAdminCompanyWebsites(companyId);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -23,6 +24,14 @@ export function WebsitesTab({ companyId }: WebsitesTabProps): JSX.Element {
 
   if (websitesQuery.isLoading || subscriptionsQuery.isLoading) {
     return <p className="text-sm text-text-secondary">Loading websites…</p>;
+  }
+
+  if (companyIsInactive) {
+    return (
+      <p className="text-sm text-text-secondary">
+        This company is inactive. Website changes are disabled until the company is reactivated.
+      </p>
+    );
   }
 
   if (!hasWebsitePlan) {

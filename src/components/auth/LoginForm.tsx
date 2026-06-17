@@ -10,6 +10,7 @@ import { FormError } from '@/components/shared/FormError';
 import { useAuth } from '@/context/auth-context';
 import * as authApi from '@/lib/api/auth.api';
 import { ApiClientError } from '@/lib/api/client';
+import { isAuthDeactivationError } from '@/lib/auth/is-auth-deactivation-error';
 import { loginSchema, type LoginDto } from '@/lib/schemas/auth.schema';
 import { notify } from '@/lib/toast';
 
@@ -38,7 +39,7 @@ export function LoginForm(): JSX.Element {
     } catch (error) {
       setPasswordSignInLocksUi(false);
       notify.dismiss(loadingId);
-      if (error instanceof ApiClientError && error.code === 'ACCOUNT_DEACTIVATED') return;
+      if (isAuthDeactivationError(error)) return;
       const message =
         error instanceof ApiClientError
           ? error.message

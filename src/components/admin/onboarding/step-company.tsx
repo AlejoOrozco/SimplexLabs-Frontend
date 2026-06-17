@@ -12,14 +12,14 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { OnboardingFormField } from '@/components/admin/onboarding/onboarding-form-field';
 import type { OnboardingStepProps } from '@/components/admin/onboarding/onboarding-step-props';
-import { useCompanies } from '@/lib/hooks/use-companies';
+import { useAdminCompanies } from '@/lib/hooks/use-admin-companies';
 import { Niche } from '@/lib/types';
 import { nicheLabel } from '@/lib/utils/format';
 
 const NICHES: readonly Niche[] = [Niche.GYM, Niche.MEDICAL, Niche.ENTREPRENEUR];
 
 export function StepCompany({ state, onUpdate }: OnboardingStepProps): JSX.Element {
-  const { data: companies = [], isLoading } = useCompanies();
+  const { data: companies = [], isLoading } = useAdminCompanies();
   const { company } = state;
 
   return (

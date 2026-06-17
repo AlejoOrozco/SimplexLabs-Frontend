@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { ApiClientError } from '@/lib/api/client';
+import { isAuthDeactivationError } from '@/lib/auth/is-auth-deactivation-error';
 
 export default function LoginPage(): JSX.Element {
   const [email, setEmail] = useState('');
@@ -22,7 +22,7 @@ export default function LoginPage(): JSX.Element {
       await login({ email, password });
     } catch (unknownError) {
       setSignInCommitPending(false);
-      if (unknownError instanceof ApiClientError && unknownError.code === 'ACCOUNT_DEACTIVATED') return;
+      if (isAuthDeactivationError(unknownError)) return;
       const message = unknownError instanceof Error ? unknownError.message : 'Login failed';
       setError(message);
     }

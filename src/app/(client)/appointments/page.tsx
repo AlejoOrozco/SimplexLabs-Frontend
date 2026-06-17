@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { AppointmentDetailModal } from '@/components/appointments/AppointmentDetailModal';
 import { AppointmentList } from '@/components/appointments/AppointmentList';
 import { PageMeta } from '@/components/layout/page-meta';
@@ -18,10 +19,17 @@ const CalendarView = dynamic(
 type ViewMode = 'calendar' | 'list';
 
 export default function AppointmentsPage(): JSX.Element {
+  const searchParams = useSearchParams();
+  const highlightAppointmentId = searchParams.get('highlight');
   const [view, setView] = useState<ViewMode>('calendar');
   const appointmentsQuery = useAppointments();
   const [selected, setSelected] = useState<Appointment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!highlightAppointmentId) return;
+    setView('calendar');
+  }, [highlightAppointmentId]);
 
   const handleRowClick = (appointment: Appointment): void => {
     setSelected(appointment);
@@ -60,7 +68,7 @@ export default function AppointmentsPage(): JSX.Element {
       </div>
 
       {view === 'calendar' ? (
-        <CalendarView />
+        <CalendarView highlightAppointmentId={highlightAppointmentId} />
       ) : appointmentsQuery.isLoading ? (
         <SkeletonTable />
       ) : appointmentsQuery.isError ? (

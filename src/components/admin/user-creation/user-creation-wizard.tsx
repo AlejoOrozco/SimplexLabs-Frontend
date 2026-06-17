@@ -12,7 +12,7 @@ import { ApiClientError } from '@/lib/api/client';
 import { buildAdminCreateUserVariables } from '@/lib/onboarding/build-admin-create-user-dto';
 import { clearWizardLocalStorageDraft, useWizardLocalStorageDraft } from '@/lib/hooks/use-wizard-local-storage-draft';
 import { useAdminCreateUser } from '@/lib/hooks/use-admin-user-creation';
-import { useCompanies } from '@/lib/hooks/use-companies';
+import { useAdminCompanies } from '@/lib/hooks/use-admin-companies';
 import { useSubscriptions } from '@/lib/hooks/use-subscriptions';
 import { notify } from '@/lib/toast';
 import type { AdminCreateUserResult } from '@/lib/types/admin-provisioning';
@@ -76,7 +76,7 @@ export function UserCreationWizard({ searchParams }: UserCreationWizardProps): J
   const [state, setState] = useState<UserWizardState>(() => parseUserWizardUrl(searchParams));
   const [result, setResult] = useState<AdminCreateUserResult | null>(null);
   const createUser = useAdminCreateUser();
-  const { data: companies = [] } = useCompanies();
+  const { data: companies = [] } = useAdminCompanies();
   const { data: subscriptions = [] } = useSubscriptions();
 
   const revive = useCallback((raw: unknown) => reviveUserWizardState(raw), []);

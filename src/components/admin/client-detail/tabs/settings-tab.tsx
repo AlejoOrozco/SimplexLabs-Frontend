@@ -17,9 +17,10 @@ import { notify } from '@/lib/toast';
 
 interface SettingsTabProps {
   companyId: string;
+  companyIsInactive?: boolean;
 }
 
-export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
+export function SettingsTab({ companyId, companyIsInactive = false }: SettingsTabProps): JSX.Element {
   const { isSimplexAdmin } = useAuth();
   const companyQuery = useCompany(companyId);
   const updateCompany = useUpdateCompany(companyId);
@@ -38,7 +39,6 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
   }
 
   const company = companyQuery.data;
-  const companyIsInactive = Boolean(company.deactivatedAt);
 
   const handleCompanySave = async (values: CreateCompanyDto): Promise<void> => {
     try {
@@ -86,10 +86,12 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
             onChange={(e) => setKbNotes(e.target.value)}
             rows={3}
             placeholder="Changes requested by the company…"
+            disabled={companyIsInactive}
           />
           <Button
             type="button"
             variant="secondary"
+            disabled={companyIsInactive}
             onClick={() => {
               notify.info('Persist agent configuration via upcoming admin settings API.');
             }}
@@ -120,8 +122,14 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
             value={whatsappNumber}
             onChange={(e) => setWhatsappNumber(e.target.value)}
             placeholder="+1…"
+            disabled={companyIsInactive}
           />
-          <Button type="button" variant="secondary" onClick={() => notify.info('WhatsApp assignment API pending.')}>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={companyIsInactive}
+            onClick={() => notify.info('WhatsApp assignment API pending.')}
+          >
             Save assignment
           </Button>
         </div>
@@ -130,7 +138,7 @@ export function SettingsTab({ companyId }: SettingsTabProps): JSX.Element {
       <section className="rounded-lg border border-border-default bg-surface-base p-4">
         <h3 className="text-sm font-semibold text-text-primary">Account</h3>
         {primaryUser && isSimplexAdmin ? (
-          <ClientAccountActions user={primaryUser} />
+          <ClientAccountActions user={primaryUser} companyIsInactive={companyIsInactive} />
         ) : (
           <p className="mt-2 text-sm text-text-secondary">
             {isSimplexAdmin ? 'No company user to deactivate.' : 'Only super admins can deactivate users.'}

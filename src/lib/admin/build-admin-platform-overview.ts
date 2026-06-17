@@ -1,5 +1,5 @@
 import type { Payment } from '@/lib/api/endpoints';
-import type { Appointment, Company, Order, Subscription } from '@/lib/types';
+import type { Appointment, Order, Subscription } from '@/lib/types';
 import { OrderStatus, SubStatus } from '@/lib/types';
 import { subStatusLabel } from '@/lib/utils/format';
 
@@ -62,7 +62,7 @@ function confirmedPaymentsTotalThisMonth(payments: Payment[]): number {
 }
 
 export function buildAdminPlatformOverview(input: {
-  companies: Company[];
+  companies: ReadonlyArray<{ id: string; name: string }>;
   subscriptions: Subscription[];
   orders: Order[];
   payments: Payment[];

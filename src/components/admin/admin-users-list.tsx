@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCompanies } from '@/lib/hooks/use-companies';
+import { useAdminCompanies } from '@/lib/hooks/use-admin-companies';
 import { useUsers } from '@/lib/hooks/use-users';
 import { UserList } from '@/components/users/UserList';
 
 export function AdminUsersList(): JSX.Element {
   const router = useRouter();
   const { data: users = [], isLoading } = useUsers();
-  const { data: companies = [] } = useCompanies();
+  const { data: companies = [] } = useAdminCompanies();
 
   if (isLoading) {
     return <p className="text-sm text-text-secondary">Loading users…</p>;

@@ -21,6 +21,14 @@ const LEGEND_ITEMS = [
     label: 'Callback requested',
     swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-callback',
   },
+  {
+    label: 'Pending invitation',
+    swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-invitation-pending',
+  },
+  {
+    label: 'Invitation accepted',
+    swatchClassName: 'calendar-legend-swatch calendar-legend-swatch-invitation-accepted',
+  },
 ] as const;
 
 export function CalendarLegend(): JSX.Element {

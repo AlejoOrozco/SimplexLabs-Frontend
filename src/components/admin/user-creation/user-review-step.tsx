@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { buildAdminCreateUserVariables } from '@/lib/onboarding/build-admin-create-user-dto';
-import { useCompanies } from '@/lib/hooks/use-companies';
+import { useAdminCompanies } from '@/lib/hooks/use-admin-companies';
 import type { UserWizardState } from '@/lib/types/user-creation-wizard-state';
 import { sessionRoleLabel } from '@/lib/utils/format';
 import { z } from 'zod';
@@ -15,7 +15,7 @@ interface UserReviewStepProps {
 }
 
 export function UserReviewStep({ state, isSubmitting, onSubmit }: UserReviewStepProps): JSX.Element {
-  const { data: companies = [] } = useCompanies();
+  const { data: companies = [] } = useAdminCompanies();
   const companyName =
     state.companyName ?? companies.find((c) => c.id === state.companyId)?.name ?? '—';
 

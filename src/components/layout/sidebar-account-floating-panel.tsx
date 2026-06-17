@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Bell, LogOut, Settings } from 'lucide-react';
+import { SidebarPanelPortal } from '@/components/layout/sidebar-panel-portal';
 import type { SidebarPanelAnchor } from '@/lib/layout/sidebar-panel-anchor';
 import { cn } from '@/lib/utils/cn';
 
@@ -11,7 +12,7 @@ interface SidebarAccountFloatingPanelProps {
   resolvedUserName: string;
   resolvedUserEmail: string | null;
   resolvedCompanyName: string | null;
-  subscriptionPlan: string | null;
+  accountSubtitle: string;
   hasUnreadNotifications: boolean;
   isSigningOut: boolean;
   onRequestClose: () => void;
@@ -44,19 +45,19 @@ export function SidebarAccountFloatingPanel({
   resolvedUserName,
   resolvedUserEmail,
   resolvedCompanyName,
-  subscriptionPlan,
+  accountSubtitle,
   hasUnreadNotifications,
   isSigningOut,
   onRequestClose,
   onOpenNotifications,
   onLogout,
 }: SidebarAccountFloatingPanelProps): JSX.Element {
-  const planLabel = subscriptionPlan ?? resolvedCompanyName ?? 'Member';
-  const isAbove = anchor.placement === 'above';
-  const panelWidth = isAbove ? anchor.width : undefined;
+  const planLabel = accountSubtitle;
+  const placement = anchor.placement ?? 'beside';
+  const panelWidth = anchor.width;
 
   return (
-    <>
+    <SidebarPanelPortal>
       <button
         type="button"
         className="fixed inset-0 z-dropdown bg-transparent"
@@ -64,15 +65,17 @@ export function SidebarAccountFloatingPanel({
         aria-label="Close account menu"
       />
       <div
+        role="menu"
         className={cn(
-          'fixed z-modal rounded-lg border border-border-default bg-surface-overlay p-2 shadow-lg',
-          isAbove ? '' : 'min-w-[280px] max-w-[calc(100vw-2rem)]',
+          'fixed z-modal overflow-y-auto rounded-lg border border-border-default bg-surface-overlay p-2 shadow-lg',
+          panelWidth ? '' : 'min-w-[280px] max-w-[calc(100vw-2rem)]',
         )}
         style={{
           left: `${anchor.left}px`,
           top: `${anchor.top}px`,
           width: panelWidth ? `${panelWidth}px` : undefined,
-          transform: isAbove ? 'translateY(-100%)' : undefined,
+          maxHeight: anchor.maxHeight ? `${anchor.maxHeight}px` : 'calc(100vh - 2rem)',
+          transform: placement === 'above' ? 'translateY(-100%)' : undefined,
         }}
       >
         <div className="space-y-0.5 px-2 py-1.5">
@@ -131,6 +134,6 @@ export function SidebarAccountFloatingPanel({
           <span>{isSigningOut ? 'Logging out...' : 'Log out'}</span>
         </AccountMenuItem>
       </div>
-    </>
+    </SidebarPanelPortal>
   );
 }

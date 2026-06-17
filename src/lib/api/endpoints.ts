@@ -93,6 +93,13 @@ const paymentSchema = z.object({
   createdAt: z.string(),
 });
 
+const notificationPayloadSchema = z
+  .object({
+    recipientUserId: z.string().uuid().optional(),
+    appointmentId: z.string().uuid().optional(),
+  })
+  .passthrough();
+
 const notificationSchema = z.object({
   id: z.string().uuid(),
   type: z.enum(['info', 'alert', 'action_required']),
@@ -102,6 +109,7 @@ const notificationSchema = z.object({
   createdAt: z.string(),
   resourceType: z.string().nullable(),
   resourceId: z.string().nullable(),
+  payload: notificationPayloadSchema.nullable().optional(),
 });
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -288,14 +296,14 @@ export const endpoints = {
       isIdempotent: true,
     }),
     markRead: endpoint({
-      path: '/notifications/mark-read/:id',
+      path: '/notifications/:id/read',
       method: 'POST',
       pathParams: z.object({ id: z.string().uuid() }),
-      response: z.object({ id: z.string().uuid(), isRead: z.boolean() }),
+      response: notificationSchema,
       isIdempotent: true,
     }),
     markAllRead: endpoint({
-      path: '/notifications/mark-all-read',
+      path: '/notifications/read-all',
       method: 'POST',
       response: z.object({ updated: z.number().int() }).passthrough(),
       isIdempotent: true,

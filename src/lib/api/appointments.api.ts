@@ -3,7 +3,11 @@ import type {
   CreateAppointmentDto,
   UpdateAppointmentDto,
 } from '@/lib/schemas/appointment.schema';
-import type { Appointment } from '@/lib/types';
+import type { Appointment, AppointmentInvitationStatus } from '@/lib/types';
+
+export interface RespondToAppointmentDto {
+  status: Extract<AppointmentInvitationStatus, 'ACCEPTED' | 'DECLINED'>;
+}
 
 export async function getAppointments(): Promise<Appointment[]> {
   return apiGet<Appointment[]>('/appointments');
@@ -17,6 +21,7 @@ export async function createAppointment(dto: CreateAppointmentDto): Promise<Appo
   return apiPost<Appointment, CreateAppointmentDto>('/appointments', dto);
 }
 
+/** Omit `attendeeUserIds` when not changing invitees; send the full list to replace attendees. */
 export async function updateAppointment(
   id: string,
   dto: UpdateAppointmentDto,
@@ -38,4 +43,11 @@ export async function requestAppointmentCallback(id: string): Promise<Appointmen
 
 export async function markAppointmentCallbackHandled(id: string): Promise<Appointment> {
   return apiPost<Appointment>(`/appointments/${id}/mark-callback-handled`);
+}
+
+export async function respondToAppointment(
+  id: string,
+  dto: RespondToAppointmentDto,
+): Promise<Appointment> {
+  return apiPut<Appointment, RespondToAppointmentDto>(`/appointments/${id}/respond`, dto);
 }

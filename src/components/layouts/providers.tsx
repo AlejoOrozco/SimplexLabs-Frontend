@@ -7,6 +7,7 @@ import { AccountDeactivatedModalRoot } from '@/components/auth/AccountDeactivate
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import { ModalProvider } from '@/context/modal-context';
 import { shouldIgnoreSpuriousSessionExpiredLogout } from '@/lib/auth/auth-failure-suppression';
+import { AUTH_DEACTIVATED_EVENT } from '@/lib/auth/account-deactivation';
 import { POST_LOGIN_REDIRECT_KEY } from '@/lib/auth/post-login-redirect';
 import { eventBus } from '@/lib/realtime/event-bus';
 import { ConversationsRealtimeBridge } from '@/components/realtime/conversations-realtime-bridge';
@@ -58,11 +59,11 @@ function SessionExpiredCoordinator(): null {
     const offDeactivated = (): void => {
       dismissSessionToast();
     };
-    window.addEventListener('account-deactivated', offDeactivated);
+    window.addEventListener(AUTH_DEACTIVATED_EVENT, offDeactivated);
 
     return () => {
       offSession();
-      window.removeEventListener('account-deactivated', offDeactivated);
+      window.removeEventListener(AUTH_DEACTIVATED_EVENT, offDeactivated);
       dismissSessionToast();
     };
   }, [logout]);

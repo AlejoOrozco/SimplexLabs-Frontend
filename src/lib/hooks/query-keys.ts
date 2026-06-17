@@ -5,6 +5,11 @@ export const queryKeys = {
     all: ['admin'] as const,
     agentFailures: () => [...queryKeys.admin.all, 'agent-failures'] as const,
     failedTasks: () => [...queryKeys.admin.all, 'failed-tasks'] as const,
+    companies: {
+      all: ['admin', 'companies'] as const,
+      list: () => [...queryKeys.admin.companies.all, 'list'] as const,
+      detail: (id: string) => [...queryKeys.admin.companies.all, 'detail', id] as const,
+    },
   },
   appointments: {
     all: ['appointments'] as const,

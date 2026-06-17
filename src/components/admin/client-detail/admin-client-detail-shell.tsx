@@ -12,9 +12,12 @@ import { useAuth } from '@/context/auth-context';
 import { ApiClientError } from '@/lib/api/client';
 import { cn } from '@/lib/utils/cn';
 import { adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
+import { canDeactivateAdminCompany, canReactivateAdminCompany } from '@/lib/admin/company-lifecycle';
+import { useAdminCompanyDetail, useReactivateAdminCompany } from '@/lib/hooks/use-admin-companies';
 import { useCompany, useDeleteCompany } from '@/lib/hooks/use-companies';
 import { queryKeys } from '@/lib/hooks/query-keys';
 import { notify } from '@/lib/toast';
+import { CompanyDeactivationInfoPanel } from '@/components/admin/client-detail/company-deactivation-info-panel';
 import {
   COMPANY_WORKSPACE_TABS,
   parseCompanyWorkspaceTab,
@@ -39,9 +42,12 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
   const searchParams = useSearchParams();
   const tab = parseCompanyWorkspaceTab(searchParams.get('tab'));
   const companyQuery = useCompany(companyId);
+  const adminDetailQuery = useAdminCompanyDetail(companyId);
   const deleteCompany = useDeleteCompany();
+  const reactivateCompany = useReactivateAdminCompany();
   const [editCompanyOpen, setEditCompanyOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [reactivateConfirmOpen, setReactivateConfirmOpen] = useState(false);
 
   if (companyQuery.isLoading) {
     return <p className="text-sm text-text-secondary">Loading company…</p>;
@@ -58,7 +64,16 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
   }
 
   const company = companyQuery.data;
-  const companyIsInactive = Boolean(company.deactivatedAt);
+  const adminDetail = adminDetailQuery.data;
+  const companyIsInactive = adminDetail ? !adminDetail.isActive : false;
+  const tenantActionsDisabled = companyIsInactive;
+  const showDeactivateCompany =
+    isSimplexAdmin && adminDetailQuery.isSuccess && adminDetail !== undefined && canDeactivateAdminCompany(adminDetail);
+  const showReactivateCompany =
+    isSimplexAdmin &&
+    adminDetailQuery.isSuccess &&
+    adminDetail !== undefined &&
+    canReactivateAdminCompany(adminDetail);
 
   const handleDeleteCompany = async (): Promise<void> => {
     try {
@@ -68,6 +83,8 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
     } catch (error) {
       if (error instanceof ApiClientError && error.status === 404) {
         void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
+        void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.all });
+        void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.detail(companyId) });
         void qc.invalidateQueries({ queryKey: queryKeys.users.all });
         notify.info('Already deleted or not found');
         setDeleteConfirmOpen(false);
@@ -77,17 +94,37 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
     }
   };
 
+  const handleReactivateCompany = async (): Promise<void> => {
+    try {
+      const result = await reactivateCompany.mutateAsync(companyId);
+      const usersLabel =
+        result.usersReactivated === 1
+          ? '1 user reactivated'
+          : `${result.usersReactivated} users reactivated`;
+      notify.success(
+        result.usersReactivated > 0 ? `Company reactivated (${usersLabel})` : 'Company reactivated',
+      );
+      setReactivateConfirmOpen(false);
+    } catch (error) {
+      if (error instanceof ApiClientError && error.status === 404) {
+        void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.all });
+        void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.detail(companyId) });
+        void qc.invalidateQueries({ queryKey: queryKeys.users.all });
+        notify.info('Company not found or already reactivated');
+        setReactivateConfirmOpen(false);
+        return;
+      }
+      notify.error('Could not reactivate company');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageMeta
         title={company.name}
         description="Deep tenant view: most tabs are read-only; use Settings to edit company data and account status on behalf of the company."
       />
-      {companyIsInactive ? (
-        <p className="rounded-md border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-secondary">
-          This company is inactive.
-        </p>
-      ) : null}
+      {adminDetail && companyIsInactive ? <CompanyDeactivationInfoPanel detail={adminDetail} /> : null}
       <div className="flex flex-wrap items-center justify-end gap-4">
         {isSimplexAdmin ? (
           <Button
@@ -95,12 +132,23 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
             variant="outline"
             size="sm"
             onClick={() => setEditCompanyOpen(true)}
-            disabled={companyIsInactive}
+            disabled={tenantActionsDisabled}
           >
             Edit
           </Button>
         ) : null}
-        {isSimplexAdmin ? (
+        {showReactivateCompany ? (
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => setReactivateConfirmOpen(true)}
+            disabled={reactivateCompany.isPending}
+          >
+            Reactivate company
+          </Button>
+        ) : null}
+        {showDeactivateCompany ? (
           <Button
             type="button"
             variant="destructive"
@@ -136,7 +184,7 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
       </div>
 
       <div className="min-h-[240px]">
-        <TabPanel tab={tab} companyId={companyId} />
+        <TabPanel tab={tab} companyId={companyId} companyIsInactive={tenantActionsDisabled} />
       </div>
 
       <EditCompanyModal company={company} open={editCompanyOpen} onClose={() => setEditCompanyOpen(false)} />
@@ -150,11 +198,28 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
         onConfirm={handleDeleteCompany}
         isLoading={deleteCompany.isPending}
       />
+      <ConfirmDialog
+        open={reactivateConfirmOpen}
+        onOpenChange={setReactivateConfirmOpen}
+        title="Reactivate company"
+        description="This will reactivate the company and all inactive users for this tenant."
+        confirmLabel="Reactivate company"
+        onConfirm={handleReactivateCompany}
+        isLoading={reactivateCompany.isPending}
+      />
     </div>
   );
 }
 
-function TabPanel({ tab, companyId }: { tab: CompanyWorkspaceTabId; companyId: string }): JSX.Element {
+function TabPanel({
+  tab,
+  companyId,
+  companyIsInactive,
+}: {
+  tab: CompanyWorkspaceTabId;
+  companyId: string;
+  companyIsInactive: boolean;
+}): JSX.Element {
   switch (tab) {
     case 'overview':
       return <OverviewTab companyId={companyId} />;
@@ -167,10 +232,10 @@ function TabPanel({ tab, companyId }: { tab: CompanyWorkspaceTabId; companyId: s
     case 'appointments':
       return <AppointmentsTab companyId={companyId} />;
     case 'websites':
-      return <WebsitesTab companyId={companyId} />;
+      return <WebsitesTab companyId={companyId} companyIsInactive={companyIsInactive} />;
     case 'team':
-      return <CompanyTeamTab companyId={companyId} />;
+      return <CompanyTeamTab companyId={companyId} companyIsInactive={companyIsInactive} />;
     case 'settings':
-      return <SettingsTab companyId={companyId} />;
+      return <SettingsTab companyId={companyId} companyIsInactive={companyIsInactive} />;
   }
 }

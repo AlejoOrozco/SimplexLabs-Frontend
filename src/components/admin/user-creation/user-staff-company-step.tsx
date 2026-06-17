@@ -4,18 +4,19 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { OnboardingFormField } from '@/components/admin/onboarding/onboarding-form-field';
-import type { Company, Subscription } from '@/lib/types';
+import type { CompanyPickerOption } from '@/components/admin/user-creation/user-client-company-step';
+import type { Subscription } from '@/lib/types';
 import { SubStatus } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 
 const RETURN_TO = encodeURIComponent('/admin/onboarding');
 
 interface UserStaffCompanyStepProps {
-  companies: readonly Company[];
+  companies: readonly CompanyPickerOption[];
   subscriptions: readonly Subscription[];
   selectedCompanyId: string | null;
   initialSearch: string;
-  onSelectCompany: (company: Company) => void;
+  onSelectCompany: (company: CompanyPickerOption) => void;
 }
 
 function activePlanCountForCompany(subs: readonly Subscription[], companyId: string): number {
@@ -75,7 +76,8 @@ export function UserStaffCompanyStep({
                   >
                     <span className="font-medium text-text-primary">{c.name}</span>
                     <span className="text-xs text-text-secondary">
-                      {c.niche} · {plans} active plan{plans === 1 ? '' : 's'}
+                      {c.niche ? `${c.niche} · ` : ''}
+                      {plans} active plan{plans === 1 ? '' : 's'}
                     </span>
                   </button>
                 </li>

@@ -44,8 +44,11 @@ export function useDeleteCompany() {
   const qc = useQueryClient();
   return useMutation<void, Error, string>({
     mutationFn: api.deleteCompany,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.companies.list() });
+    onSuccess: (_data, companyId) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
+      void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.all });
+      void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.detail(companyId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.users.all });
     },
   });
 }

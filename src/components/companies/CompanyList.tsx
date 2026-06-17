@@ -1,7 +1,6 @@
 'use client';
 
 import { DataTable, type DataTableColumn } from '@/components/shared/DataTable';
-import { Badge } from '@/components/ui/badge';
 import type { Company } from '@/lib/types';
 import { formatDate, nicheLabel } from '@/lib/utils/format';
 
@@ -18,15 +17,6 @@ export function CompanyList({ companies, onRowClick }: CompanyListProps): JSX.El
       cell: (row) => <span className="font-medium">{row.name}</span>,
     },
     { id: 'niche', header: 'Niche', cell: (row) => nicheLabel(row.niche) },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (row) => (
-        <Badge variant={row.deactivatedAt ? 'neutral' : 'success'}>
-          {row.deactivatedAt ? 'Inactive' : 'Active'}
-        </Badge>
-      ),
-    },
     { id: 'phone', header: 'Phone', cell: (row) => row.phone ?? '—' },
     { id: 'createdAt', header: 'Created', cell: (row) => formatDate(row.createdAt) },
   ];

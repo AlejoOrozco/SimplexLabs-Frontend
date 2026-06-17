@@ -1,4 +1,9 @@
-import type { AppointmentStatus, AppointmentType } from '@/lib/types';
+import type {
+  AppointmentInvitationStatus,
+  AppointmentStatus,
+  AppointmentType,
+  AppointmentViewerRole,
+} from '@/lib/types';
 
 export type CalendarScope = 'all' | 'mine';
 
@@ -19,6 +24,9 @@ export interface CalendarEventRecord {
   callMeAsap?: boolean;
   isRecurring?: boolean;
   organizer?: CalendarOrganizerRef;
+  viewerRole?: AppointmentViewerRole;
+  invitationPending?: boolean;
+  invitationStatus?: AppointmentInvitationStatus;
 }
 
 export interface AvailabilityConflict {

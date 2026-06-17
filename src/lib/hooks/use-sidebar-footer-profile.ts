@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { getCompanies } from '@/lib/api/companies.api';
+import { useAuth } from '@/context/auth-context';
+import { getCompany } from '@/lib/api/companies.api';
 import { readAuthProfile } from '@/lib/auth/profile-cache';
 import { getMeProfilePreview } from '@/lib/layout/me-payload-profile-preview';
+import { queryKeys } from '@/lib/hooks/query-keys';
 import { fullName } from '@/lib/utils/format';
 
 export interface SidebarFooterProfileInputs {
@@ -18,6 +20,7 @@ export function useSidebarFooterProfile(
   resolvedUserEmail: string | null;
   resolvedCompanyName: string | null;
 } {
+  const { user } = useAuth();
   const cachedProfile = readAuthProfile();
   const profile = getMeProfilePreview(mePayload);
   const cachedDisplayName = fullName({
@@ -27,16 +30,17 @@ export function useSidebarFooterProfile(
   const resolvedUserName = profile.name || cachedDisplayName || props.userName;
   const resolvedUserEmail = profile.email ?? cachedProfile?.email ?? props.userEmail;
   const companyId = profile.companyId ?? cachedProfile?.companyId ?? null;
+  const companyNameFromMe = profile.companyName ?? user?.company?.name ?? null;
 
-  const companiesQuery = useQuery({
-    queryKey: ['companies', 'sidebar-footer'],
-    queryFn: getCompanies,
+  const companyDetailQuery = useQuery({
+    queryKey: queryKeys.companies.detail(companyId ?? ''),
+    queryFn: () => getCompany(companyId as string),
+    enabled: Boolean(companyId) && !companyNameFromMe,
+    staleTime: 60_000,
   });
 
-  const matchedCompany = companyId
-    ? companiesQuery.data?.find((company) => company.id === companyId)
-    : null;
-  const resolvedCompanyName = matchedCompany?.name ?? props.companyName;
+  const resolvedCompanyName =
+    companyNameFromMe ?? companyDetailQuery.data?.name ?? props.companyName;
 
   return { resolvedUserName, resolvedUserEmail, resolvedCompanyName };
 }

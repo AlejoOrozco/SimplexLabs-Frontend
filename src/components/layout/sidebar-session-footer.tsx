@@ -18,13 +18,11 @@ import {
 import { clearAuthProfile } from '@/lib/auth/profile-cache';
 import { readSessionRoleFromMePayload } from '@/lib/auth/session-role-utils';
 import { useSidebarFooterProfile } from '@/lib/hooks/use-sidebar-footer-profile';
-import { getSidebarNotificationHref } from '@/lib/layout/sidebar-notification-href';
-import {
-  anchorSidebarPanelAboveTrigger,
-  clampSidebarPanelLeft,
-  type SidebarPanelAnchor,
-} from '@/lib/layout/sidebar-panel-anchor';
+import { getSidebarNotificationHref, isNotificationForUser } from '@/lib/notifications/notification-routing';
+import { anchorSidebarAccountPanel, clampSidebarPanelLeft, type SidebarPanelAnchor } from '@/lib/layout/sidebar-panel-anchor';
 import { notify } from '@/lib/toast';
+import { sessionRoleShortLabel } from '@/lib/utils/format';
+import { useAuth } from '@/context/auth-context';
 import { cn } from '@/lib/utils/cn';
 
 export interface SidebarSessionFooterProps {
@@ -43,6 +41,7 @@ export function SidebarSessionFooter({
   subscriptionPlan,
 }: SidebarSessionFooterProps): JSX.Element {
   const router = useRouter();
+  const { user } = useAuth();
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const [accountAnchor, setAccountAnchor] = useState<SidebarPanelAnchor | null>(null);
   const [notificationAnchor, setNotificationAnchor] = useState<SidebarPanelAnchor | null>(null);
@@ -66,7 +65,8 @@ export function SidebarSessionFooter({
   const userRole = readSessionRoleFromMePayload(meQuery.data);
   const hasUnreadNotifications = unreadCount > 0;
   const profileHref = '/settings/company';
-  const planSubtitle = subscriptionPlan ?? resolvedCompanyName ?? 'Member';
+  const accountSubtitle =
+    subscriptionPlan ?? resolvedCompanyName ?? sessionRoleShortLabel(userRole) ?? 'Account';
 
   const refreshUnreadCount = useCallback(async (): Promise<void> => {
     try {
@@ -133,8 +133,7 @@ export function SidebarSessionFooter({
       setNotificationAnchor(null);
       setAccountAnchor((current) => {
         if (current) return null;
-        if (isCollapsed) return clampSidebarPanelLeft(rect, 280);
-        return anchorSidebarPanelAboveTrigger(rect);
+        return anchorSidebarAccountPanel(rect, isCollapsed);
       });
     },
     [isCollapsed],
@@ -159,6 +158,8 @@ export function SidebarSessionFooter({
 
   const handleNotificationClick = useCallback(
     async (notification: Notification): Promise<void> => {
+      if (!isNotificationForUser(notification, user?.id)) return;
+
       if (!notification.isRead) {
         await markNotificationRead(notification.id);
       }
@@ -169,7 +170,7 @@ export function SidebarSessionFooter({
       setNotificationAnchor(null);
       router.push(getSidebarNotificationHref(notification, userRole));
     },
-    [router, userRole],
+    [router, user?.id, userRole],
   );
 
   const handleLogout = async (): Promise<void> => {
@@ -224,7 +225,7 @@ export function SidebarSessionFooter({
                 <span className="block truncate font-medium leading-tight text-text-primary">
                   {resolvedUserName}
                 </span>
-                <span className="block truncate text-[11px] leading-tight text-text-secondary">{planSubtitle}</span>
+                <span className="block truncate text-[11px] leading-tight text-text-secondary">{accountSubtitle}</span>
               </span>
               <MoreHorizontal
                 size={16}
@@ -249,7 +250,7 @@ export function SidebarSessionFooter({
           resolvedUserName={resolvedUserName}
           resolvedUserEmail={resolvedUserEmail}
           resolvedCompanyName={resolvedCompanyName}
-          subscriptionPlan={subscriptionPlan}
+          accountSubtitle={accountSubtitle}
           hasUnreadNotifications={hasUnreadNotifications}
           isSigningOut={isSigningOut}
           onRequestClose={() => setAccountAnchor(null)}

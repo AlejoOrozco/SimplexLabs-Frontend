@@ -7,7 +7,7 @@ import type { OnboardingStepProps } from '@/components/admin/onboarding/onboardi
 import { ApiClientError } from '@/lib/api/client';
 import { buildCompleteOnboardingDto } from '@/lib/onboarding/build-complete-onboarding-dto';
 import { paymentMethodLabel } from '@/lib/onboarding/payment-method-label';
-import { useCompanies } from '@/lib/hooks/use-companies';
+import { useAdminCompanies } from '@/lib/hooks/use-admin-companies';
 import { useCompleteOnboarding } from '@/lib/hooks/use-onboarding';
 import { usePlans } from '@/lib/hooks/use-plans';
 import { notify } from '@/lib/toast';
@@ -33,7 +33,7 @@ function ReviewSection({ title, rows }: { title: string; rows: { label: string; 
 export function StepReview({ state }: OnboardingStepProps): JSX.Element {
   const [result, setResult] = useState<OnboardingResult | null>(null);
   const completeOnboarding = useCompleteOnboarding();
-  const { data: companies = [] } = useCompanies();
+  const { data: companies = [] } = useAdminCompanies();
   const { data: plans = [] } = usePlans();
 
   const companyRows = useMemo(() => {

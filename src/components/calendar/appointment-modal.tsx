@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import * as companiesApi from '@/lib/api/companies.api';
-import { adminCreateCompanyAppointment } from '@/lib/api/admin-appointments.api';
 import { createAppointment } from '@/lib/api/appointments.api';
 import { ApiClientError } from '@/lib/api/client';
 import { deriveAppointmentTargetingFromAttendees } from '@/lib/appointments/derive-appointment-targeting-from-attendees';
@@ -41,11 +40,6 @@ interface AppointmentModalProps {
   /** When set (e.g. admin company workspace), creation is scoped to this tenant. */
   companyId?: string;
   onClose: () => void;
-}
-
-interface CreateMutationInput {
-  dto: CreateAppointmentDto;
-  adminCompanyId?: string;
 }
 
 export function AppointmentModal({
@@ -75,17 +69,13 @@ export function AppointmentModal({
   });
 
   const createMut = useMutation({
-    mutationFn: async ({ dto, adminCompanyId }: CreateMutationInput) => {
-      if (adminCompanyId) return adminCreateCompanyAppointment(adminCompanyId, dto);
-      return createAppointment(dto);
-    },
-    onSuccess: async (_data, variables) => {
+    mutationFn: (dto: CreateAppointmentDto) => createAppointment(dto),
+    onSuccess: async (_data, dto) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.calendar.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.appointments.all });
-      const cid = variables.adminCompanyId ?? companyId;
-      if (cid) {
+      if (dto.companyId) {
         await queryClient.invalidateQueries({
-          queryKey: ['admin', 'company', cid, 'appointments'],
+          queryKey: ['admin', 'company', dto.companyId, 'appointments'],
         });
       }
     },
@@ -142,6 +132,7 @@ export function AppointmentModal({
       return;
     }
 
+    const tenantId = resolvedAdminCompanyId?.trim();
     const dto: CreateAppointmentDto = {
       title: title.trim() || 'Appointment',
       description: description.trim() === '' ? null : description.trim(),
@@ -153,6 +144,7 @@ export function AppointmentModal({
       meetingUrl: null,
       externalAttendeeName: null,
       externalAttendeeEmail: null,
+      ...(tenantId ? { companyId: tenantId } : {}),
       attendeeUserIds: selectedAttendees.length > 0 ? selectedAttendees.map((a) => a.id) : undefined,
     };
 
@@ -163,10 +155,7 @@ export function AppointmentModal({
     }
 
     try {
-      await createMut.mutateAsync({
-        dto: parsed.data,
-        adminCompanyId: resolvedAdminCompanyId?.trim() ? resolvedAdminCompanyId.trim() : undefined,
-      });
+      await createMut.mutateAsync(parsed.data);
       notify.success('Appointment created');
       onClose();
     } catch (e) {

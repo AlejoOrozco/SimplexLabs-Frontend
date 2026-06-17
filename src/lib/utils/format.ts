@@ -184,6 +184,18 @@ export function sessionRoleLabel(role: SessionRoleName | null | undefined): stri
   return SESSION_ROLE_LABELS[role] ?? role;
 }
 
+const SESSION_ROLE_SHORT_LABELS: Partial<Record<SessionRoleName, string>> = {
+  COMPANY_ADMIN: 'Admin',
+  COMPANY_STAFF: 'Staff',
+  CLIENT: 'Client',
+};
+
+/** Compact role label for sidebar account subtitle (not a subscription tier). */
+export function sessionRoleShortLabel(role: SessionRoleName | null | undefined): string | null {
+  if (!role) return null;
+  return SESSION_ROLE_SHORT_LABELS[role] ?? sessionRoleLabel(role);
+}
+
 export function productTypeLabel(type: ProductType): string {
   return PRODUCT_TYPE_LABELS[type];
 }

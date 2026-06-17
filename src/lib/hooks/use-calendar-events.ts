@@ -16,6 +16,9 @@ function toEventInput(record: CalendarEventRecord): EventInput {
       callMeAsap: record.callMeAsap,
       isRecurring: record.isRecurring,
       organizer: record.organizer,
+      viewerRole: record.viewerRole,
+      invitationPending: record.invitationPending,
+      invitationStatus: record.invitationStatus,
     },
   };
 }

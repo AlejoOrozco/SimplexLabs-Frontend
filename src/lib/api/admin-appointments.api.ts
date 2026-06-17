@@ -1,14 +1,11 @@
-import { apiPost } from '@/lib/api/client';
+import { createAppointment } from '@/lib/api/appointments.api';
 import type { CreateAppointmentDto } from '@/lib/schemas/appointment.schema';
 import type { Appointment } from '@/lib/types';
 
-/** Tenant is taken from the path; JWT identifies the operator. */
+/** Platform operator scheduling for a tenant — same POST /appointments body with `companyId`. */
 export async function adminCreateCompanyAppointment(
   companyId: string,
   dto: CreateAppointmentDto,
 ): Promise<Appointment> {
-  return apiPost<Appointment, CreateAppointmentDto>(
-    `/admin/companies/${encodeURIComponent(companyId)}/appointments`,
-    dto,
-  );
+  return createAppointment({ ...dto, companyId });
 }

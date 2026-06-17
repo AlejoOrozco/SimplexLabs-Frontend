@@ -213,6 +213,15 @@ body {
   animation: callback-pulse 2s ease-in-out infinite;
 }
 
+.calendar-legend-swatch-invitation-pending {
+  background: transparent;
+  border: 1.5px dashed var(--color-warning);
+}
+
+.calendar-legend-swatch-invitation-accepted {
+  background: var(--color-success);
+}
+
 .calendar-legend-label {
   font-size: var(--text-xs);
   color: var(--text-secondary);
@@ -249,6 +258,19 @@ body {
   border-radius: 50%;
   background-color: var(--text-primary);
   opacity: 0.7;
+}
+
+.event-badge-invitation-accepted {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+}
+
+.event-invitation-label {
+  font-weight: var(--font-semibold);
+  opacity: 0.95;
 }
 
 /* ─── FullCalendar overrides ─────────────────────── */
@@ -402,6 +424,28 @@ body {
     0 0 0 2px var(--color-warning),
     0 0 12px var(--color-marketing-glow) !important;
   animation: callback-pulse 2s ease-in-out infinite !important;
+}
+
+.fc .event-invitation-pending {
+  background: color-mix(in srgb, var(--color-warning) 18%, var(--surface-overlay)) !important;
+  border: 1.5px dashed var(--color-warning) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+.fc .event-invitation-accepted {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-success) 85%, black),
+    var(--color-success)
+  ) !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-success) 35%, transparent) !important;
+  color: var(--text-inverse) !important;
+}
+
+.fc .event-highlighted {
+  outline: 2px solid var(--color-brand) !important;
+  outline-offset: 1px !important;
 }
 
 @keyframes callback-pulse {

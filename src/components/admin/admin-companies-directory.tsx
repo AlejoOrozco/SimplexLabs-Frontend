@@ -2,15 +2,15 @@
 
 import Link from 'next/link';
 import { useSubscriptions } from '@/lib/hooks/use-subscriptions';
-import { useCompanies } from '@/lib/hooks/use-companies';
-import { pickPrimaryCompanyAdmin } from '@/lib/admin/pick-primary-company-admin';
+import { useAdminCompanies } from '@/lib/hooks/use-admin-companies';
 import { adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
 import { SubStatus } from '@/lib/types';
-import { fullName } from '@/lib/utils/format';
+import { fullName, nicheLabel } from '@/lib/utils/format';
+import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export function AdminCompaniesDirectory(): JSX.Element {
-  const { data: companies = [], isLoading } = useCompanies();
+  const { data: companies = [], isLoading } = useAdminCompanies();
   const { data: subscriptions = [] } = useSubscriptions();
 
   if (isLoading) {
@@ -24,13 +24,16 @@ export function AdminCompaniesDirectory(): JSX.Element {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Niche</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Active plans</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {companies.map((c) => {
+            const inactive = !c.isActive;
+            const showOperationalHint = c.isActive && !c.isOperational;
             const activeCount = subscriptions.filter((s) => s.companyId === c.id && s.status === SubStatus.ACTIVE).length;
-            const primaryAdmin = pickPrimaryCompanyAdmin(c);
+            const primaryAdmin = c.primaryAdmin;
             return (
               <TableRow key={c.id}>
                 <TableCell>
@@ -43,13 +46,22 @@ export function AdminCompaniesDirectory(): JSX.Element {
                     {primaryAdmin ? (
                       <>
                         Admin: {fullName(primaryAdmin)} · {primaryAdmin.email}
+                        {!primaryAdmin.isActive ? ' (inactive)' : null}
                       </>
                     ) : (
                       <>Admin: —</>
                     )}
                   </p>
                 </TableCell>
-                <TableCell>{c.niche}</TableCell>
+                <TableCell>{nicheLabel(c.niche)}</TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <Badge variant={inactive ? 'neutral' : 'success'}>{inactive ? 'Inactive' : 'Active'}</Badge>
+                    {showOperationalHint ? (
+                      <p className="text-xs text-text-secondary">No active users</p>
+                    ) : null}
+                  </div>
+                </TableCell>
                 <TableCell>{activeCount}</TableCell>
               </TableRow>
             );

@@ -32,9 +32,9 @@ export async function getUnreadNotificationCount(): Promise<number> {
 }
 
 export async function markNotificationRead(notificationId: string): Promise<void> {
-  await apiPost(`/notifications/mark-read/${notificationId}`);
+  await apiPost(`/notifications/${notificationId}/read`);
 }
 
 export async function markAllNotificationsRead(): Promise<void> {
-  await apiPost('/notifications/mark-all-read');
+  await apiPost('/notifications/read-all');
 }

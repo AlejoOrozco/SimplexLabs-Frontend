@@ -88,3 +88,19 @@ export function useMarkAppointmentCallbackHandled(companyId?: string) {
     },
   });
 }
+
+export function useRespondToAppointment() {
+  const qc = useQueryClient();
+  return useMutation<
+    Appointment,
+    Error,
+    { id: string; status: api.RespondToAppointmentDto['status'] }
+  >({
+    mutationFn: ({ id, status }) => api.respondToAppointment(id, { status }),
+    onSuccess: (_, { id }) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.list() });
+      void qc.invalidateQueries({ queryKey: queryKeys.appointments.detail(id) });
+      void qc.invalidateQueries({ queryKey: queryKeys.calendar.all });
+    },
+  });
+}

@@ -6,9 +6,9 @@ import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
 import { adminSendUserCredentialsEmail } from '@/lib/api/admin-user-creation.api';
+import { canDeactivateUser } from '@/lib/admin/company-lifecycle';
 import { useAuth } from '@/context/auth-context';
 import { queryKeys } from '@/lib/hooks/query-keys';
-import { useCompany } from '@/lib/hooks/use-companies';
 import { useDeleteUser, useUsersByCompany } from '@/lib/hooks/use-users';
 import { notify } from '@/lib/toast';
 import type { User } from '@/lib/types';
@@ -33,6 +33,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 interface CompanyTeamTabProps {
   companyId: string;
+  companyIsInactive?: boolean;
 }
 
 function sortTenantUsers(rows: readonly User[]): User[] {
@@ -43,15 +44,13 @@ function sortTenantUsers(rows: readonly User[]): User[] {
   });
 }
 
-export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element {
+export function CompanyTeamTab({ companyId, companyIsInactive = false }: CompanyTeamTabProps): JSX.Element {
   const { isSimplexAdmin } = useAuth();
   const qc = useQueryClient();
-  const companyQuery = useCompany(companyId);
   const usersQuery = useUsersByCompany(companyId);
   const [confirmUser, setConfirmUser] = useState<User | null>(null);
 
   const deleteUserMutation = useDeleteUser();
-  const companyIsInactive = Boolean(companyQuery.data?.deactivatedAt);
 
   const deleteUserActionMutation = useMutation({
     mutationFn: async (userId: string) => deleteUserMutation.mutateAsync(userId),
@@ -65,6 +64,8 @@ export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element 
       if (err instanceof ApiClientError && err.status === 404) {
         void qc.invalidateQueries({ queryKey: queryKeys.users.all });
         void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
+        void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.all });
+        void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.detail(companyId) });
         notify.info('Already deleted or not found');
         setConfirmUser(null);
         return;
@@ -146,9 +147,9 @@ export function CompanyTeamTab({ companyId }: CompanyTeamTabProps): JSX.Element 
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {isSimplexAdmin ? (
+                        {isSimplexAdmin && canDeactivateUser(user, companyIsInactive) ? (
                           <DropdownMenuItem
-                            disabled={companyIsInactive || deleteUserActionMutation.isPending}
+                            disabled={deleteUserActionMutation.isPending}
                             onSelect={() => setConfirmUser(user)}
                           >
                             Delete user

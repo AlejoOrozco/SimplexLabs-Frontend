@@ -59,6 +59,22 @@ export const AppointmentConfirmationStatus = {
 export type AppointmentConfirmationStatus =
   (typeof AppointmentConfirmationStatus)[keyof typeof AppointmentConfirmationStatus];
 
+/** Calendar / appointment attendee perspective from the API. */
+export const AppointmentViewerRole = {
+  ORGANIZER: 'organizer',
+  INVITEE: 'invitee',
+} as const;
+export type AppointmentViewerRole = (typeof AppointmentViewerRole)[keyof typeof AppointmentViewerRole];
+
+/** Attendee invitation response state for calendar events and appointment detail. */
+export const AppointmentInvitationStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED',
+} as const;
+export type AppointmentInvitationStatus =
+  (typeof AppointmentInvitationStatus)[keyof typeof AppointmentInvitationStatus];
+
 export const ConvoStatus = {
   OPEN: 'OPEN',
   CLOSED: 'CLOSED',
@@ -159,8 +175,6 @@ export interface Company {
   niche: Niche;
   phone: string | null;
   address: string | null;
-  deactivatedAt?: string | null;
-  deactivationReason?: string | null;
   notificationPhone?: string | null;
   notificationEmail?: string | null;
   whatsappPhoneNumberId?: string | null;
@@ -326,6 +340,10 @@ export interface Appointment {
   organizer?: Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>;
   contact?: Pick<ClientContact, 'id' | 'firstName' | 'lastName' | 'email'>;
   product?: Pick<Product, 'id' | 'name'>;
+  /** Present when the signed-in user is an attendee (invitee) or organizer. */
+  viewerRole?: AppointmentViewerRole;
+  invitationPending?: boolean;
+  invitationStatus?: AppointmentInvitationStatus;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -30,11 +30,28 @@ import type { CalendarScope, PendingMove } from '@/lib/types/calendar';
 import type { Appointment } from '@/lib/types';
 import { getUserTimezone } from '@/lib/utils/timezone';
 import { notify } from '@/lib/toast';
+import { isAcceptedInvitation, isPendingInvitation } from '@/lib/appointments/invitation-utils';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 
 interface CalendarViewProps {
   companyId?: string;
+  /** Opens the detail modal and highlights this event on the grid (e.g. from notification deep link). */
+  highlightAppointmentId?: string | null;
+}
+
+function readInvitationProps(extendedProps: Record<string, unknown>): {
+  viewerRole?: string;
+  invitationPending?: boolean;
+  invitationStatus?: string;
+} {
+  return {
+    viewerRole: typeof extendedProps.viewerRole === 'string' ? extendedProps.viewerRole : undefined,
+    invitationPending:
+      typeof extendedProps.invitationPending === 'boolean' ? extendedProps.invitationPending : undefined,
+    invitationStatus:
+      typeof extendedProps.invitationStatus === 'string' ? extendedProps.invitationStatus : undefined,
+  };
 }
 
 function readOrganizerId(raw: unknown): string | undefined {
@@ -44,14 +61,14 @@ function readOrganizerId(raw: unknown): string | undefined {
   return undefined;
 }
 
-export function CalendarView({ companyId }: CalendarViewProps): JSX.Element {
+export function CalendarView({ companyId, highlightAppointmentId }: CalendarViewProps): JSX.Element {
   const { user, isSimplexAdmin, isSimplexStaff } = useAuth();
   const calendarRef = useRef<FullCalendar>(null);
   const userTimezone = getUserTimezone(user?.timezone);
   const isAdmin = isSimplexAdmin || isSimplexStaff;
 
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [scope, setScope] = useState<CalendarScope>('mine');
+  const [scope, setScope] = useState<CalendarScope>(() => (isAdmin ? 'all' : 'mine'));
   const [selectedStaffId, setSelectedStaffId] = useState<string | undefined>();
 
   const [createModal, setCreateModal] = useState<{
@@ -82,6 +99,11 @@ export function CalendarView({ companyId }: CalendarViewProps): JSX.Element {
     queryFn: () => getAppointment(detailAppointmentId as string),
     enabled: detailAppointmentId !== null,
   });
+
+  useEffect(() => {
+    if (!highlightAppointmentId) return;
+    setDetailAppointmentId(highlightAppointmentId);
+  }, [highlightAppointmentId]);
 
   const handleDatesSet = useCallback((arg: DatesSetArg) => {
     setDateRange({
@@ -151,27 +173,45 @@ export function CalendarView({ companyId }: CalendarViewProps): JSX.Element {
     setDetailAppointmentId(arg.event.id);
   }, []);
 
-  const eventClassNames = useCallback((arg: EventContentArg) => {
-    const classes: string[] = ['calendar-event'];
-    const type = arg.event.extendedProps['type'] as string | undefined;
-    const status = arg.event.extendedProps['status'] as string | undefined;
-    const callMeAsap = Boolean(arg.event.extendedProps['callMeAsap']);
+  const eventClassNames = useCallback(
+    (arg: EventContentArg) => {
+      const classes: string[] = ['calendar-event'];
+      const type = arg.event.extendedProps['type'] as string | undefined;
+      const status = arg.event.extendedProps['status'] as string | undefined;
+      const callMeAsap = Boolean(arg.event.extendedProps['callMeAsap']);
+      const invitation = readInvitationProps(arg.event.extendedProps as Record<string, unknown>);
 
-    if (type === 'SIMPLEX_WITH_CLIENT') classes.push('event-brand');
-    else if (type === 'CLIENT_WITH_CONTACT') classes.push('event-info');
-    else classes.push('event-neutral');
+      if (isPendingInvitation(invitation)) classes.push('event-invitation-pending');
+      else if (isAcceptedInvitation(invitation)) classes.push('event-invitation-accepted');
+      else if (type === 'SIMPLEX_WITH_CLIENT') classes.push('event-brand');
+      else if (type === 'CLIENT_WITH_CONTACT') classes.push('event-info');
+      else classes.push('event-neutral');
 
-    if (status === 'PENDING') classes.push('event-pending');
-    if (status === 'CANCELLED') classes.push('event-cancelled');
-    if (callMeAsap) classes.push('event-callback-requested');
+      if (status === 'PENDING') classes.push('event-pending');
+      if (status === 'CANCELLED') classes.push('event-cancelled');
+      if (callMeAsap) classes.push('event-callback-requested');
+      if (highlightAppointmentId && arg.event.id === highlightAppointmentId) {
+        classes.push('event-highlighted');
+      }
 
-    return classes;
-  }, []);
+      return classes;
+    },
+    [highlightAppointmentId],
+  );
 
   const renderEventContent = useCallback((arg: EventContentArg) => {
     const callMeAsap = Boolean(arg.event.extendedProps['callMeAsap']);
     const isRecurring = Boolean(arg.event.extendedProps['isRecurring']);
-    return <EventCard title={arg.event.title} callMeAsap={callMeAsap} isRecurring={isRecurring} />;
+    const invitation = readInvitationProps(arg.event.extendedProps as Record<string, unknown>);
+    return (
+      <EventCard
+        title={arg.event.title}
+        callMeAsap={callMeAsap}
+        isRecurring={isRecurring}
+        invitationPending={isPendingInvitation(invitation)}
+        invitationAccepted={isAcceptedInvitation(invitation)}
+      />
+    );
   }, []);
 
   const detailAppointment: Appointment | null = detailQuery.data ?? null;

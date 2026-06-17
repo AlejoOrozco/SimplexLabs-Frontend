@@ -56,6 +56,7 @@ export function useDeleteUser() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.users.all });
       void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
+      void qc.invalidateQueries({ queryKey: queryKeys.admin.companies.all });
     },
   });
 }
