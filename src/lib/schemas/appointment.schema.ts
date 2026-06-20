@@ -21,9 +21,5 @@ export const createAppointmentSchema = z.object({
 
 export const updateAppointmentSchema = createAppointmentSchema.partial();
 
-/** Form validation before `type` is derived from attendee selection. */
-export const appointmentFormSchema = createAppointmentSchema.omit({ type: true });
-
 export type CreateAppointmentDto = z.infer<typeof createAppointmentSchema>;
 export type UpdateAppointmentDto = z.infer<typeof updateAppointmentSchema>;
-export type AppointmentFormDto = z.infer<typeof appointmentFormSchema>;

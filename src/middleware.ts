@@ -11,12 +11,32 @@ const PROTECTED_PREFIXES = [
   '/notifications',
   '/settings',
   '/websites',
-  '/failed-tasks',
-  '/companies',
-  '/health',
 ];
 
+const LEGACY_ADMIN_REDIRECTS: Readonly<Record<string, string>> = {
+  '/companies': '/admin/companies',
+  '/failed-tasks': '/admin/failed-tasks',
+  '/health': '/admin/health',
+};
+
+function legacyAdminRedirect(request: NextRequest): NextResponse | null {
+  const { pathname, search } = request.nextUrl;
+
+  for (const [legacyPrefix, canonicalPrefix] of Object.entries(LEGACY_ADMIN_REDIRECTS)) {
+    if (pathname === legacyPrefix || pathname.startsWith(`${legacyPrefix}/`)) {
+      const suffix = pathname.slice(legacyPrefix.length);
+      const destination = new URL(`${canonicalPrefix}${suffix}${search}`, request.url);
+      return NextResponse.redirect(destination);
+    }
+  }
+
+  return null;
+}
+
 export function middleware(request: NextRequest): NextResponse {
+  const legacyRedirect = legacyAdminRedirect(request);
+  if (legacyRedirect) return legacyRedirect;
+
   const { pathname } = request.nextUrl;
   const isProtectedRoute = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   if (!isProtectedRoute) return NextResponse.next();
@@ -40,8 +60,8 @@ export const config = {
     '/notifications/:path*',
     '/settings/:path*',
     '/websites/:path*',
-    '/failed-tasks/:path*',
     '/companies/:path*',
+    '/failed-tasks/:path*',
     '/health/:path*',
   ],
 };
