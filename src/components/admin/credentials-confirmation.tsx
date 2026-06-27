@@ -4,7 +4,7 @@ import { CheckCircle, TriangleAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ApiClientError } from '@/lib/api/client';
+import { getApiErrorMessage, isApiNotFoundError } from '@/lib/api/get-api-error-message';
 import { useSendOnboardingCredentials } from '@/lib/hooks/use-onboarding';
 import { notify } from '@/lib/toast';
 import type { AdminCreateUserResult } from '@/lib/types/admin-provisioning';
@@ -12,7 +12,7 @@ import type { AdminCreateUserResult } from '@/lib/types/admin-provisioning';
 const PLATFORM_URL =
   typeof process.env.NEXT_PUBLIC_APP_URL === 'string' && process.env.NEXT_PUBLIC_APP_URL.length > 0
     ? process.env.NEXT_PUBLIC_APP_URL
-    : 'https://app.simplexlabs.co';
+    : 'https://app.simplexlabs.org';
 
 function CredentialRow({
   label,
@@ -40,12 +40,19 @@ export interface CredentialsConfirmationProps {
   result: AdminCreateUserResult;
   /** Primary navigation after the admin is done sharing credentials. */
   doneHref?: string;
+  /** When false, hides email send (e.g. company staff role not supported by the endpoint). */
+  canSendEmail?: boolean;
 }
 
-export function CredentialsConfirmation({ result, doneHref = '/admin/companies' }: CredentialsConfirmationProps): JSX.Element {
+export function CredentialsConfirmation({
+  result,
+  doneHref = '/admin/companies',
+  canSendEmail = true,
+}: CredentialsConfirmationProps): JSX.Element {
   const router = useRouter();
   const sendCredentials = useSendOnboardingCredentials();
   const [emailSent, setEmailSent] = useState(false);
+  const [emailSendFailed, setEmailSendFailed] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const credentialBlock = `Email: ${result.email}\nPassword: ${result.password}\nPlatform: ${PLATFORM_URL}`;
@@ -89,34 +96,55 @@ export function CredentialsConfirmation({ result, doneHref = '/admin/companies' 
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1"
-          disabled={emailSent}
-          onClick={async () => {
-            try {
-              await sendCredentials.mutateAsync({
-                userId: result.userId,
-                email: result.email,
-                password: result.password,
-                firstName: result.firstName,
-                companyName: result.companyName,
-              });
-              setEmailSent(true);
-              notify.success('Credentials email queued');
-            } catch (err) {
-              const message = err instanceof ApiClientError ? err.message : 'Could not send email';
-              notify.error(message);
-            }
-          }}
-        >
-          {sendCredentials.isPending ? 'Sending…' : emailSent ? 'Email sent' : 'Send via email'}
-        </Button>
+        {canSendEmail ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            disabled={emailSent}
+            onClick={async () => {
+              try {
+                const { sent } = await sendCredentials.mutateAsync({
+                  userId: result.userId,
+                  email: result.email,
+                  password: result.password,
+                  firstName: result.firstName,
+                  companyName: result.companyName,
+                });
+                if (sent) {
+                  setEmailSent(true);
+                  setEmailSendFailed(false);
+                  notify.success('Credentials email sent');
+                  return;
+                }
+                setEmailSendFailed(true);
+                notify.warning(
+                  'Email could not be delivered. Copy the credentials below and share them manually.',
+                );
+              } catch (err) {
+                if (isApiNotFoundError(err)) {
+                  notify.error(
+                    'Could not send email — user not found or this role cannot receive credential emails. Copy credentials manually.',
+                  );
+                  return;
+                }
+                notify.error(getApiErrorMessage(err, 'Could not send email'));
+              }
+            }}
+          >
+            {sendCredentials.isPending ? 'Sending…' : emailSent ? 'Email sent' : 'Send via email'}
+          </Button>
+        ) : null}
         <Button type="button" className="flex-1" onClick={() => router.push(doneHref)}>
           Done
         </Button>
       </div>
+      {emailSendFailed ? (
+        <p className="text-sm text-warning-dark">
+          The user account was created, but the credentials email did not go through. Use copy above or try
+          sending again.
+        </p>
+      ) : null}
     </div>
   );
 }

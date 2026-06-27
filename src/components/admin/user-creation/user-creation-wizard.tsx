@@ -10,6 +10,7 @@ import { UserStaffCompanyStep } from '@/components/admin/user-creation/user-staf
 import { UserStaffRoleStep } from '@/components/admin/user-creation/user-staff-role-step';
 import { ApiClientError } from '@/lib/api/client';
 import { buildAdminCreateUserVariables } from '@/lib/onboarding/build-admin-create-user-dto';
+import { canSendOnboardingCredentialsEmail } from '@/lib/api/onboarding.api';
 import { clearWizardLocalStorageDraft, useWizardLocalStorageDraft } from '@/lib/hooks/use-wizard-local-storage-draft';
 import { useAdminCreateUser } from '@/lib/hooks/use-admin-user-creation';
 import { useAdminCompanies } from '@/lib/hooks/use-admin-companies';
@@ -159,7 +160,14 @@ export function UserCreationWizard({ searchParams }: UserCreationWizardProps): J
   };
 
   if (result) {
-    return <CredentialsConfirmation result={result} doneHref="/admin/users" />;
+    const emailRole = state.userType === 'client' ? 'COMPANY_ADMIN' : state.role;
+    return (
+      <CredentialsConfirmation
+        result={result}
+        doneHref="/admin/users"
+        canSendEmail={canSendOnboardingCredentialsEmail(emailRole)}
+      />
+    );
   }
 
   const isClientFlow = state.userType === 'client';

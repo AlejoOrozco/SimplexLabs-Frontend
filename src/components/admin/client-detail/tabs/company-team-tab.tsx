@@ -5,14 +5,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
-import { adminSendUserCredentialsEmail } from '@/lib/api/admin-user-creation.api';
 import { canDeactivateUser } from '@/lib/admin/company-lifecycle';
 import { useAuth } from '@/context/auth-context';
 import { queryKeys } from '@/lib/hooks/query-keys';
 import { useDeleteUser, useUsersByCompany } from '@/lib/hooks/use-users';
 import { notify } from '@/lib/toast';
 import type { User } from '@/lib/types';
-import { fullName, sessionRoleLabel } from '@/lib/utils/format';
+import { formatDateTime, fullName, sessionRoleLabel } from '@/lib/utils/format';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,17 +74,6 @@ export function CompanyTeamTab({ companyId, companyIsInactive = false }: Company
     },
   });
 
-  const sendCredentialsMutation = useMutation({
-    mutationFn: async (userId: string) => adminSendUserCredentialsEmail(userId),
-    onSuccess: () => {
-      notify.success('Credentials email queued');
-    },
-    onError: (err) => {
-      const message = err instanceof ApiClientError ? err.message : 'Could not send credentials email';
-      notify.error(message);
-    },
-  });
-
   if (usersQuery.isLoading) {
     return <p className="text-sm text-text-secondary">Loading team…</p>;
   }
@@ -102,7 +90,8 @@ export function CompanyTeamTab({ companyId, companyIsInactive = false }: Company
   return (
     <div className="space-y-4">
       <p className="text-sm text-text-secondary">
-        Tenant users with login access. Use the menu to deactivate user accounts, open permissions, or email a fresh password.
+        Tenant users with login access. Email credentials from the onboarding wizard right after creating a user.
+        Use the menu to deactivate accounts or open permissions.
       </p>
       {companyIsInactive ? (
         <p className="text-xs text-text-secondary">Company is inactive. Team edits are disabled.</p>
@@ -116,13 +105,14 @@ export function CompanyTeamTab({ companyId, companyIsInactive = false }: Company
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Credentials</TableHead>
               <TableHead className="w-[72px] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-sm text-text-secondary">
+                <TableCell colSpan={6} className="text-sm text-text-secondary">
                   No users found for this company.
                 </TableCell>
               </TableRow>
@@ -138,6 +128,11 @@ export function CompanyTeamTab({ companyId, companyIsInactive = false }: Company
                     <Badge variant={user.isActive ? 'success' : 'neutral'}>
                       {user.isActive ? 'Active' : 'Inactive'}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-text-secondary">
+                    {user.credentialsSentAt
+                      ? `Emailed ${formatDateTime(user.credentialsSentAt)}`
+                      : 'Not emailed'}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -157,14 +152,6 @@ export function CompanyTeamTab({ companyId, companyIsInactive = false }: Company
                         ) : null}
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/users/${user.id}/permissions`}>View permissions</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          disabled={sendCredentialsMutation.isPending || companyIsInactive}
-                          onSelect={() => {
-                            sendCredentialsMutation.mutate(user.id);
-                          }}
-                        >
-                          Reset password (email)
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

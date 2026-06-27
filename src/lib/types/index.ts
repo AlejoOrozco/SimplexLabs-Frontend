@@ -194,6 +194,8 @@ export interface User {
   role: SessionRoleName;
   isActive: boolean;
   companyId: string | null;
+  /** Set after POST /admin/onboarding/send-credentials (or password reset email) succeeds. */
+  credentialsSentAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

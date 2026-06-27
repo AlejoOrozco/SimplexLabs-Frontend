@@ -1,4 +1,5 @@
 import { apiPost } from '@/lib/api/client';
+import { normalizeAdminCreateUserResult } from '@/lib/onboarding/normalize-admin-create-user-result';
 import type {
   AdminCreateClientUserDto,
   AdminCreateStaffUserDto,
@@ -6,17 +7,17 @@ import type {
 } from '@/lib/types/admin-provisioning';
 
 export async function adminCreateClientUser(dto: AdminCreateClientUserDto): Promise<AdminCreateUserResult> {
-  return apiPost<AdminCreateUserResult, AdminCreateClientUserDto>('/admin/users/create-client', dto);
+  const raw = await apiPost<unknown, AdminCreateClientUserDto>('/admin/users/create-client', dto);
+  return normalizeAdminCreateUserResult(raw, {
+    firstName: dto.firstName,
+    lastName: dto.lastName,
+  });
 }
 
 export async function adminCreateStaffUser(dto: AdminCreateStaffUserDto): Promise<AdminCreateUserResult> {
-  return apiPost<AdminCreateUserResult, AdminCreateStaffUserDto>('/admin/users/create-staff', dto);
-}
-
-/** POST /admin/users/:userId/send-credentials — server issues a new password and emails credentials. */
-export async function adminSendUserCredentialsEmail(userId: string): Promise<void> {
-  await apiPost<void, Record<string, never>>(
-    `/admin/users/${encodeURIComponent(userId)}/send-credentials`,
-    {},
-  );
+  const raw = await apiPost<unknown, AdminCreateStaffUserDto>('/admin/users/create-staff', dto);
+  return normalizeAdminCreateUserResult(raw, {
+    firstName: dto.firstName,
+    lastName: dto.lastName,
+  });
 }
