@@ -66,19 +66,19 @@ export function ManageSubscriptionsSection({
   const [cancelTarget, setCancelTarget] = useState<AdminCompanySubscription | null>(null);
   const [cancelReason, setCancelReason] = useState('');
 
-  const subscriptions = subscriptionsQuery.data ?? [];
   const companyNiche = companyQuery.data?.niche;
 
   const subscriptionsByCategory = useMemo(() => {
+    const rows = subscriptionsQuery.data ?? [];
     const map = new Map<AdminPlanCategory, AdminCompanySubscription[]>();
     for (const category of PLAN_CATEGORIES) {
       map.set(
         category,
-        subscriptions.filter((s) => subscriptionMatchesCategory(s, category)),
+        rows.filter((s) => subscriptionMatchesCategory(s, category)),
       );
     }
     return map;
-  }, [subscriptions]);
+  }, [subscriptionsQuery.data]);
 
   if (subscriptionsQuery.isLoading || companyQuery.isLoading) {
     return (

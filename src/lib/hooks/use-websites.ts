@@ -4,7 +4,6 @@ import { queryKeys } from '@/lib/hooks/query-keys';
 import { notify } from '@/lib/toast';
 import type { UpdateWebsiteDto } from '@/lib/schemas/website.schema';
 import type { Website } from '@/lib/types';
-import { ApiClientError } from '@/lib/api/client';
 
 const WEBSITES_STALE_MS = 1000 * 60 * 2;
 
