@@ -5,9 +5,10 @@ import { PageMeta } from '@/components/layout/page-meta';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Skeleton } from '@/components/shared/Skeleton';
 import { WebsiteCard } from '@/components/websites/WebsiteCard';
+import { useAuth } from '@/context/auth-context';
 import { useSubscriptions } from '@/lib/hooks/use-subscriptions';
 import { useWebsites } from '@/lib/hooks/use-websites';
-import { subscriptionIncludesActiveWebsitePlan } from '@/lib/websites/subscription-includes-active-website-plan';
+import { companyHasActiveWebsitePlan } from '@/lib/websites/company-has-active-website-plan';
 
 const WEBSITES_TITLE = 'Websites';
 
@@ -35,6 +36,7 @@ function WebsitesPageSkeleton(): JSX.Element {
 }
 
 export default function WebsitesPage(): JSX.Element {
+  const { user } = useAuth();
   const websitesQuery = useWebsites();
   const subscriptionsQuery = useSubscriptions();
 
@@ -42,7 +44,7 @@ export default function WebsitesPage(): JSX.Element {
   const websites = websitesQuery.data;
   const subscriptions = subscriptionsQuery.data;
 
-  const hasWebsitePlan = subscriptionIncludesActiveWebsitePlan(subscriptions);
+  const hasWebsitePlan = companyHasActiveWebsitePlan(user?.companyId ?? '', subscriptions);
 
   if (isLoading) return <WebsitesPageSkeleton />;
 

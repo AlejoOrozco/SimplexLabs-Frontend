@@ -26,10 +26,6 @@ export async function markFirstLoginComplete(): Promise<AuthenticatedUser> {
   return normalizeAuthenticatedUser(raw);
 }
 
-export async function getGoogleOAuthUrl(): Promise<{ url: string }> {
-  return apiGet<{ url: string }>('/auth/oauth/google');
-}
-
 export async function handleOAuthCallback(accessToken: string): Promise<AuthenticatedUser> {
   const raw = await apiPost<unknown>(
     `/auth/oauth/callback?access_token=${encodeURIComponent(accessToken)}`,

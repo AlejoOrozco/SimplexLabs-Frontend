@@ -1,5 +1,5 @@
-import { apiDelete, apiGet, apiPost, apiPut } from '@/lib/api/client';
-import type { CreateCompanyDto, UpdateCompanyDto } from '@/lib/schemas/company.schema';
+import { apiDelete, apiGet, apiPut } from '@/lib/api/client';
+import type { UpdateCompanyDto } from '@/lib/schemas/company.schema';
 import type { Company } from '@/lib/types';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -8,10 +8,6 @@ export async function getCompanies(): Promise<Company[]> {
 
 export async function getCompany(id: string): Promise<Company> {
   return apiGet<Company>(`/companies/${id}`);
-}
-
-export async function createCompany(dto: CreateCompanyDto): Promise<Company> {
-  return apiPost<Company, CreateCompanyDto>('/companies', dto);
 }
 
 export async function updateCompany(id: string, dto: UpdateCompanyDto): Promise<Company> {

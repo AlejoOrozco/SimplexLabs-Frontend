@@ -1,8 +1,5 @@
-import { apiDelete, apiGet, apiPost, apiPut } from '@/lib/api/client';
-import type {
-  CreateAppointmentDto,
-  UpdateAppointmentDto,
-} from '@/lib/schemas/appointment.schema';
+import { apiGet, apiPost, apiPut } from '@/lib/api/client';
+import type { CreateAppointmentDto } from '@/lib/schemas/appointment.schema';
 import type { Appointment, AppointmentInvitationStatus } from '@/lib/types';
 
 export interface RespondToAppointmentDto {
@@ -19,18 +16,6 @@ export async function getAppointment(id: string): Promise<Appointment> {
 
 export async function createAppointment(dto: CreateAppointmentDto): Promise<Appointment> {
   return apiPost<Appointment, CreateAppointmentDto>('/appointments', dto);
-}
-
-/** Omit `attendeeUserIds` when not changing invitees; send the full list to replace attendees. */
-export async function updateAppointment(
-  id: string,
-  dto: UpdateAppointmentDto,
-): Promise<Appointment> {
-  return apiPut<Appointment, UpdateAppointmentDto>(`/appointments/${id}`, dto);
-}
-
-export async function deleteAppointment(id: string): Promise<void> {
-  await apiDelete<void>(`/appointments/${id}`);
 }
 
 export async function confirmAppointment(id: string): Promise<Appointment> {

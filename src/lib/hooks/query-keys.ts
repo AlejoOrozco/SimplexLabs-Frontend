@@ -1,4 +1,5 @@
 import type { Channel } from '@/lib/types';
+import type { AgentKbListFilters, AdminPlanListFilters } from '@/lib/types/admin-hub';
 
 export const queryKeys = {
   admin: {
@@ -9,6 +10,26 @@ export const queryKeys = {
       all: ['admin', 'companies'] as const,
       list: () => [...queryKeys.admin.companies.all, 'list'] as const,
       detail: (id: string) => [...queryKeys.admin.companies.all, 'detail', id] as const,
+    },
+    manage: {
+      all: ['admin', 'manage'] as const,
+      summary: (companyId: string) =>
+        [...queryKeys.admin.manage.all, 'summary', companyId] as const,
+      subscriptions: (companyId: string) =>
+        [...queryKeys.admin.manage.all, 'subscriptions', companyId] as const,
+      users: (companyId: string) => [...queryKeys.admin.manage.all, 'users', companyId] as const,
+      agentConfig: (companyId: string) =>
+        [...queryKeys.admin.manage.all, 'agent-config', companyId] as const,
+      knowledgeBase: (companyId: string, filters?: AgentKbListFilters) =>
+        [...queryKeys.admin.manage.all, 'knowledge-base', companyId, filters ?? {}] as const,
+      billingOverview: (companyId: string) =>
+        [...queryKeys.admin.manage.all, 'billing-overview', companyId] as const,
+    },
+    plans: {
+      all: ['admin', 'plans'] as const,
+      list: (filters?: AdminPlanListFilters) =>
+        [...queryKeys.admin.plans.all, 'list', filters ?? {}] as const,
+      detail: (planId: string) => [...queryKeys.admin.plans.all, 'detail', planId] as const,
     },
   },
   appointments: {

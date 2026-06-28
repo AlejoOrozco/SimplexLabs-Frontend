@@ -242,14 +242,6 @@ export const endpoints = {
       response: appointmentSchema,
       isIdempotent: false,
     }),
-    reject: endpoint({
-      path: '/appointments/:id/reject',
-      method: 'POST',
-      pathParams: z.object({ id: z.string().uuid() }),
-      body: z.object({ reason: z.string().max(240).optional() }),
-      response: appointmentSchema,
-      isIdempotent: false,
-    }),
   },
   payments: {
     list: endpoint({
@@ -258,29 +250,6 @@ export const endpoints = {
       query: listQuerySchema.extend({ status: z.string().optional() }),
       response: paginatedResponseSchema(paymentSchema),
       isIdempotent: true,
-    }),
-    getById: endpoint({
-      path: '/payments/:id',
-      method: 'GET',
-      pathParams: z.object({ id: z.string().uuid() }),
-      response: paymentSchema,
-      isIdempotent: true,
-    }),
-    confirmWire: endpoint({
-      path: '/payments/:id/confirm-wire',
-      method: 'POST',
-      pathParams: z.object({ id: z.string().uuid() }),
-      body: z.object({ note: z.string().min(3).max(240) }),
-      response: paymentSchema,
-      isIdempotent: false,
-    }),
-    rejectWire: endpoint({
-      path: '/payments/:id/reject-wire',
-      method: 'POST',
-      pathParams: z.object({ id: z.string().uuid() }),
-      body: z.object({ note: z.string().min(3).max(240) }),
-      response: paymentSchema,
-      isIdempotent: false,
     }),
   },
   notifications: {

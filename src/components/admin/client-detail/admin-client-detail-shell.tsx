@@ -6,12 +6,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { PageMeta } from '@/components/layout/page-meta';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Button } from '@/components/ui/button';
-import { EditCompanyModal } from '@/components/companies/EditCompanyModal';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { ApiClientError } from '@/lib/api/client';
 import { cn } from '@/lib/utils/cn';
-import { adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
+import { adminCompanyManageSectionHref, adminCompanyWorkspaceHref } from '@/lib/admin/admin-company-workspace-href';
 import { canDeactivateAdminCompany, canReactivateAdminCompany } from '@/lib/admin/company-lifecycle';
 import { useAdminCompanyDetail, useReactivateAdminCompany } from '@/lib/hooks/use-admin-companies';
 import { useCompany, useDeleteCompany } from '@/lib/hooks/use-companies';
@@ -23,6 +22,7 @@ import {
   parseCompanyWorkspaceTab,
   type CompanyWorkspaceTabId,
 } from '@/components/admin/client-detail/client-detail-tabs';
+import { AdminCompanyManageTab } from '@/components/admin/manage/company/admin-company-manage-tab';
 import { OverviewTab } from '@/components/admin/client-detail/tabs/overview-tab';
 import { ConversationsTab } from '@/components/admin/client-detail/tabs/conversations-tab';
 import { OrdersPaymentsTab } from '@/components/admin/client-detail/tabs/orders-payments-tab';
@@ -30,7 +30,6 @@ import { AgentPerformanceTab } from '@/components/admin/client-detail/tabs/agent
 import { AppointmentsTab } from '@/components/admin/client-detail/tabs/appointments-tab';
 import { WebsitesTab } from '@/components/admin/client-detail/tabs/websites-tab';
 import { CompanyTeamTab } from '@/components/admin/client-detail/tabs/company-team-tab';
-import { SettingsTab } from '@/components/admin/client-detail/tabs/settings-tab';
 
 interface AdminCompanyWorkspaceShellProps {
   companyId: string;
@@ -45,7 +44,6 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
   const adminDetailQuery = useAdminCompanyDetail(companyId);
   const deleteCompany = useDeleteCompany();
   const reactivateCompany = useReactivateAdminCompany();
-  const [editCompanyOpen, setEditCompanyOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [reactivateConfirmOpen, setReactivateConfirmOpen] = useState(false);
 
@@ -122,19 +120,19 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
     <div className="space-y-6">
       <PageMeta
         title={company.name}
-        description="Deep tenant view: most tabs are read-only; use Settings to edit company data and account status on behalf of the company."
+        description="Deep tenant view: use Manage to edit plans, users, and integrations; other tabs are mostly read-only."
       />
       {adminDetail && companyIsInactive ? <CompanyDeactivationInfoPanel detail={adminDetail} /> : null}
       <div className="flex flex-wrap items-center justify-end gap-4">
-        {isSimplexAdmin ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setEditCompanyOpen(true)}
-            disabled={tenantActionsDisabled}
-          >
-            Edit
+        {isSimplexAdmin && !tenantActionsDisabled ? (
+          <Button type="button" variant="outline" size="sm" asChild>
+            <Link href={adminCompanyManageSectionHref(companyId, 'profile')} scroll={false}>
+              Edit profile
+            </Link>
+          </Button>
+        ) : isSimplexAdmin ? (
+          <Button type="button" variant="outline" size="sm" disabled>
+            Edit profile
           </Button>
         ) : null}
         {showReactivateCompany ? (
@@ -187,7 +185,6 @@ export function AdminCompanyWorkspaceShell({ companyId }: AdminCompanyWorkspaceS
         <TabPanel tab={tab} companyId={companyId} companyIsInactive={tenantActionsDisabled} />
       </div>
 
-      <EditCompanyModal company={company} open={editCompanyOpen} onClose={() => setEditCompanyOpen(false)} />
       <ConfirmDialog
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
@@ -223,6 +220,8 @@ function TabPanel({
   switch (tab) {
     case 'overview':
       return <OverviewTab companyId={companyId} />;
+    case 'manage':
+      return <AdminCompanyManageTab companyId={companyId} companyIsInactive={companyIsInactive} />;
     case 'conversations':
       return <ConversationsTab companyId={companyId} />;
     case 'orders':
@@ -235,7 +234,5 @@ function TabPanel({
       return <WebsitesTab companyId={companyId} companyIsInactive={companyIsInactive} />;
     case 'team':
       return <CompanyTeamTab companyId={companyId} companyIsInactive={companyIsInactive} />;
-    case 'settings':
-      return <SettingsTab companyId={companyId} companyIsInactive={companyIsInactive} />;
   }
 }

@@ -40,6 +40,8 @@ export interface CredentialsConfirmationProps {
   result: AdminCreateUserResult;
   /** Primary navigation after the admin is done sharing credentials. */
   doneHref?: string;
+  /** When set, called instead of navigating to `doneHref`. */
+  onDone?: () => void;
   /** When false, hides email send (e.g. company staff role not supported by the endpoint). */
   canSendEmail?: boolean;
 }
@@ -47,6 +49,7 @@ export interface CredentialsConfirmationProps {
 export function CredentialsConfirmation({
   result,
   doneHref = '/admin/companies',
+  onDone,
   canSendEmail = true,
 }: CredentialsConfirmationProps): JSX.Element {
   const router = useRouter();
@@ -135,7 +138,17 @@ export function CredentialsConfirmation({
             {sendCredentials.isPending ? 'Sending…' : emailSent ? 'Email sent' : 'Send via email'}
           </Button>
         ) : null}
-        <Button type="button" className="flex-1" onClick={() => router.push(doneHref)}>
+        <Button
+          type="button"
+          className="flex-1"
+          onClick={() => {
+            if (onDone) {
+              onDone();
+              return;
+            }
+            router.push(doneHref);
+          }}
+        >
           Done
         </Button>
       </div>

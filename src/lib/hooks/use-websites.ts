@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as api from '@/lib/api/websites.api';
 import { queryKeys } from '@/lib/hooks/query-keys';
 import { notify } from '@/lib/toast';
-import type { CreateWebsiteDto, UpdateWebsiteDto } from '@/lib/schemas/website.schema';
+import type { UpdateWebsiteDto } from '@/lib/schemas/website.schema';
 import type { Website } from '@/lib/types';
 import { ApiClientError } from '@/lib/api/client';
 
@@ -13,30 +13,6 @@ export function useWebsites() {
     queryKey: queryKeys.websites.list(),
     queryFn: api.getWebsites,
     staleTime: WEBSITES_STALE_MS,
-  });
-}
-
-export function useWebsite(id: string | undefined) {
-  return useQuery<Website>({
-    queryKey: queryKeys.websites.detail(id ?? ''),
-    queryFn: () => api.getWebsite(id as string),
-    enabled: Boolean(id),
-    staleTime: WEBSITES_STALE_MS,
-  });
-}
-
-export function useCreateWebsite() {
-  const qc = useQueryClient();
-  return useMutation<Website, Error, CreateWebsiteDto>({
-    mutationFn: api.createWebsite,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.websites.all });
-      notify.success('Website added');
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof ApiClientError ? error.message : 'Failed to add website';
-      notify.error(message);
-    },
   });
 }
 

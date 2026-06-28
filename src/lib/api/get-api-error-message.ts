@@ -17,3 +17,13 @@ export function isApiNotFoundError(error: unknown): boolean {
   }
   return false;
 }
+
+export function isApiConflictError(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    return error.statusCode === 409 || error.code === 'conflict';
+  }
+  if (error instanceof ApiClientError) {
+    return error.status === 409 || error.code === 'conflict';
+  }
+  return false;
+}

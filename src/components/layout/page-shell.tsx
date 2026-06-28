@@ -39,6 +39,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   permissions: 'Permissions',
   conversations: 'Conversations',
   health: 'Health',
+  manage: 'Manage',
   forbidden: 'Forbidden',
 };
 

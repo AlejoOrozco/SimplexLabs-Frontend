@@ -20,9 +20,15 @@ import type { Website } from '@/lib/types';
 interface AdminWebsiteRowProps {
   website: Website;
   onEditStart?: () => void;
+  /** When false, URL/label are read-only (no edit, delete, or active toggle). */
+  canManage?: boolean;
 }
 
-export function AdminWebsiteRow({ website, onEditStart }: AdminWebsiteRowProps): JSX.Element {
+export function AdminWebsiteRow({
+  website,
+  onEditStart,
+  canManage = true,
+}: AdminWebsiteRowProps): JSX.Element {
   const updateWebsite = useUpdateWebsite();
   const deleteWebsite = useDeleteWebsite();
   const [editing, setEditing] = useState(false);
@@ -129,40 +135,46 @@ export function AdminWebsiteRow({ website, onEditStart }: AdminWebsiteRowProps):
           )}
         </div>
 
-        <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-text-secondary">Active</span>
-            <Switch
-              checked={website.isActive}
-              onCheckedChange={handleToggleActive}
-              disabled={busy || editing}
-            />
+        {canManage ? (
+          <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-secondary">Active</span>
+              <Switch
+                checked={website.isActive}
+                onCheckedChange={handleToggleActive}
+                disabled={busy || editing}
+              />
+            </div>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8"
+                aria-label="Edit website"
+                onClick={startEdit}
+                disabled={busy || editing}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-error hover:text-error-dark"
+                aria-label="Delete website"
+                onClick={() => setDeleteOpen(true)}
+                disabled={busy || editing}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-1">
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8"
-              aria-label="Edit website"
-              onClick={startEdit}
-              disabled={busy || editing}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 text-error hover:text-error-dark"
-              aria-label="Delete website"
-              onClick={() => setDeleteOpen(true)}
-              disabled={busy || editing}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+        ) : (
+          <div className="shrink-0 text-xs text-text-secondary">
+            {website.isActive ? 'Active' : 'Inactive'}
           </div>
-        </div>
+        )}
       </div>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>

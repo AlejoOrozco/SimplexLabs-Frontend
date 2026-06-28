@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as api from '@/lib/api/companies.api';
 import { queryKeys } from '@/lib/hooks/query-keys';
-import type { CreateCompanyDto, UpdateCompanyDto } from '@/lib/schemas/company.schema';
+import type { UpdateCompanyDto } from '@/lib/schemas/company.schema';
 import type { Company } from '@/lib/types';
 
 export function useCompanies() {
@@ -16,16 +16,6 @@ export function useCompany(id: string | undefined) {
     queryKey: queryKeys.companies.detail(id ?? ''),
     queryFn: () => api.getCompany(id as string),
     enabled: Boolean(id),
-  });
-}
-
-export function useCreateCompany() {
-  const qc = useQueryClient();
-  return useMutation<Company, Error, CreateCompanyDto>({
-    mutationFn: api.createCompany,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.companies.list() });
-    },
   });
 }
 

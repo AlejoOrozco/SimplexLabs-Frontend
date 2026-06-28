@@ -12,8 +12,4 @@ export const permissionsApi = {
   ): Promise<void> {
     await apiPut<void, { updates: typeof updates }>(`/permissions/users/${userId}`, { updates });
   },
-
-  async updateUserRole(userId: string, roleName: string): Promise<void> {
-    await apiPut<void, { roleName: string }>(`/permissions/users/${userId}/role`, { roleName });
-  },
 };

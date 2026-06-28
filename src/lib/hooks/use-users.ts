@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as api from '@/lib/api/users.api';
 import { queryKeys } from '@/lib/hooks/query-keys';
-import type { CreateUserDto, UpdateUserDto } from '@/lib/schemas/user.schema';
 import type { User } from '@/lib/types';
 
 export function useUsers() {
@@ -24,28 +23,6 @@ export function useUser(id: string | undefined) {
     queryKey: queryKeys.users.detail(id ?? ''),
     queryFn: () => api.getUser(id as string),
     enabled: Boolean(id),
-  });
-}
-
-export function useCreateUser() {
-  const qc = useQueryClient();
-  return useMutation<User, Error, CreateUserDto>({
-    mutationFn: api.createUser,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.users.all });
-      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
-    },
-  });
-}
-
-export function useUpdateUser(id: string) {
-  const qc = useQueryClient();
-  return useMutation<User, Error, UpdateUserDto>({
-    mutationFn: (dto) => api.updateUser(id, dto),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: queryKeys.users.all });
-      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
-    },
   });
 }
 
